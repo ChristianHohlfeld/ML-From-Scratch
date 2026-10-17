@@ -1,0 +1,17 @@
+{
+  "task": "group_contrast",
+  "seed": 7,
+  "steps": 55,
+  "full": 0.998047,
+  "without_hub": 0.533203,
+  "without_group": 0.650391,
+  "without_pairs": 0.986328,
+  "without_neighbors": 0.998047,
+  "fixed_ratios": 0.996094,
+  "stiffness_mean": 1.9228,
+  "stiffness_range": [
+    0.0055,
+    10.3571
+  ],
+  "ratio_deviation_abs_mean": 0.5062
+}

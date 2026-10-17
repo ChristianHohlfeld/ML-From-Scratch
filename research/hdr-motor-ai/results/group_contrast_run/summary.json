@@ -1,0 +1,37 @@
+{
+  "version": "0.3.0",
+  "task": "group_contrast",
+  "seed": 7,
+  "epochs": 80,
+  "steps": 55,
+  "train_samples": 512,
+  "validation_samples": 256,
+  "test_samples": 512,
+  "model_results": {
+    "motor": {
+      "best_epoch": 80,
+      "validation_loss": 0.044989,
+      "test_accuracy": 0.998047,
+      "test_loss": 0.040922,
+      "parameter_count": 292,
+      "training_seconds": 22.42
+    },
+    "mlp": {
+      "best_epoch": 72,
+      "validation_loss": 0.019396,
+      "test_accuracy": 0.994141,
+      "test_loss": 0.020282,
+      "parameter_count": 129,
+      "training_seconds": 0.37
+    },
+    "attention": {
+      "best_epoch": 57,
+      "validation_loss": 0.34978,
+      "test_accuracy": 0.8125,
+      "test_loss": 0.419506,
+      "parameter_count": 733,
+      "training_seconds": 0.97
+    }
+  },
+  "warning": "Synthetic demonstrations only. This is a numerical mechanical simulation; training uses offline backpropagation."
+}

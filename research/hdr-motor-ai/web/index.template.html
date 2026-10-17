@@ -1,0 +1,99 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090f19"><title>HDR Motor AI · Physical Learning Lab v0.3</title>
+<style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:dark;--bg:#090f19;--panel:#101b29;--border:#293c50;--muted:#96adc1;--mint:#72ebd2;--orange:#ffbf69;--violet:#baadff;--blue:#78b8d7;--red:#ef8888}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#152839 0,transparent 58%),var(--bg);color:#ecf4fa}button,input{font:inherit}button{cursor:pointer}a{color:var(--mint)}header{border-bottom:1px solid #213144;background:#0b1420b0;position:sticky;top:0;z-index:4;backdrop-filter:blur(18px)}.head{max-width:1500px;margin:auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;letter-spacing:-.025em}.brand em{font-style:normal;color:var(--mint)}.brand small{font-weight:500;color:var(--muted)}.pulse{width:13px;height:13px;border-radius:50%;background:var(--mint);box-shadow:0 0 15px #2caa9470}.pill{border:1px solid #38516b;border-radius:99px;color:var(--mint);padding:6px 12px;font-size:12px}
+main{max-width:1500px;padding:20px 24px 65px;margin:auto}.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}.intro h1{font-size:clamp(22px,3vw,34px);margin:0 0 6px;letter-spacing:-.04em}.intro p{color:var(--muted);margin:0;font-size:13px;line-height:1.55;max-width:850px}.chip{color:#ffd499;background:#563a202f;border:1px solid #735037;font-size:11px;border-radius:99px;padding:7px 12px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:17px}.panel{background:linear-gradient(160deg,#132132,#101a28 85%);border:1px solid var(--border);border-radius:18px;overflow:hidden}.panelhead{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #263749;gap:12px}.panelhead strong{font-size:14px}.panelhead small{font-size:11px;color:var(--muted)}.stage{padding:10px;position:relative}.network{width:100%;height:auto;display:block;touch-action:pan-y}.key{display:flex;flex-wrap:wrap;gap:14px;padding:0 14px 16px;color:var(--muted);font-size:11px}.key span:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:6px}.key .k2:before{background:var(--violet)}.key .k3:before{background:var(--orange)}
+.dash{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}.stat{background:#112031;border:1px solid var(--border);padding:13px;border-radius:13px;min-width:0}.stat label{display:block;color:var(--muted);font-size:11px}.stat b{font-size:clamp(17px,2.1vw,27px);letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat b.orange{color:var(--orange)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #344c61;background:#1a2b3d;color:#f0f7fc;border-radius:10px;padding:9px 12px;font-size:12px;transition:background .2s}.btn:hover{background:#264056}.btn.primary{background:#207f74;border-color:#339e8f}.btn.warn{border-color:#6d4d45;color:#ffd3c0}.btn:focus-visible,input:focus-visible{outline:2px solid var(--orange);outline-offset:3px}section.pad{padding:14px 16px}.side{display:flex;flex-direction:column;gap:14px}.subhead{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;margin-bottom:10px}.subhead small{color:var(--muted);font-weight:400;font-size:11px}.scrollmotors{max-height:360px;overflow:auto;padding-right:4px}.motor{border-bottom:1px solid #2a3b4e;padding:9px 1px}.motor:last-child{border:0}.top{display:flex;justify-content:space-between;gap:5px;color:#dbeaf5;font-size:12px;margin-bottom:9px}.badge{color:var(--mint);font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--mint);height:7px}input[type=file]{display:none}.notice{color:var(--muted);background:#0b1722;border:1px dashed #36506a;border-radius:12px;font-size:12px;line-height:1.55;padding:12px}.twos{display:grid;grid-template-columns:1fr 1fr;gap:9px}.twos .btn{padding:10px 5px}.couple{background:#0c1824;border:1px solid #324659;border-radius:12px;padding:12px}.couple small{color:var(--muted)}.couple .top{margin:12px 0 5px}.chartwrap{margin-top:17px}.chart{display:block;width:100%;height:185px}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-top:17px}.formula{font-family:ui-monospace,monospace;font-size:12px;color:#d1e0e9;white-space:pre-wrap;line-height:1.75}.explain{color:var(--muted);line-height:1.6;font-size:12px}.status{margin-top:14px;color:#e9d7ba;font-size:12px;border-left:3px solid var(--orange);padding:7px 12px;background:#503b2430}.subtle{font-size:11px;color:var(--muted)}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.side .panel:last-child{grid-column:1/-1}.scrollmotors{max-height:220px}}
+@media(max-width:650px){.head{padding:13px 14px}.pill{display:none}main{padding:16px 12px 65px}.intro{display:block}.intro .chip{display:inline-block;margin-top:10px}.side{grid-template-columns:1fr}.side .panel:last-child{grid-column:auto}.dash{grid-template-columns:repeat(2,minmax(0,1fr))}.bottom{grid-template-columns:1fr}.network{min-height:235px}.stat b{font-size:22px}.panelhead{padding:13px}.key{gap:8px}}
+</style></head><body><header><div class="head"><div class="brand"><span class="pulse"></span><div>HDR <em>MOTOR AI</em> <small> / Physical Learning Lab</small></div></div><span class="pill">v0.3 · lokal · kein CDN</span></div></header>
+<main><div class="intro"><div><h1>Intelligenz aus Kopplung.</h1><p>Jeder Motor beeinflusst andere Motoren, Nachbarn, Gruppen und die passive Referenz V₀. Die Geometrie wird nicht neu gelöst: Drehmomente, Trägheit und Dämpfung bewegen das System fortlaufend. Erlernte Getriebeparameter können als JSON geladen werden.</p></div><div class="chip">Forschungsprototyp · numerische Mechanik</div></div>
+<div class="layout"><div>
+ <div class="panel"><div class="panelhead"><strong>Mechanischer Raum</strong><small>Linie antippen: Kopplung einstellen</small></div><div class="stage"><svg id="network" class="network" viewBox="0 0 900 560" role="img" aria-label="Simulation der mechanisch gekoppelten Motoren und V-Null"></svg></div><div class="key"><span>Motoren · Türkis</span><span class="k2">Gruppen · Violett</span><span class="k3">V₀ · passiv</span></div></div>
+ <div class="dash"><div class="stat"><label>V₀ Sensor</label><b class="orange" id="sensor">0.000</b></div><div class="stat"><label>V₀ Winkel</label><b id="hubangle">0.000</b></div><div class="stat"><label>V₀ Geschwindigkeit</label><b id="hubvel">0.000</b></div><div class="stat"><label>Gesamtenergie</label><b id="energy">0.00</b></div></div>
+ <div class="panel chartwrap"><div class="panelhead"><strong>Physikalische Auslesung</strong><small>V₀ Winkel über simulierte Zeit</small></div><section class="pad"><svg id="chart" class="chart" viewBox="0 0 800 185" aria-label="Verlauf des V-Null-Winkels"></svg><p class="subtle">Motoränderungen erzeugen transiente Bewegungen. Zeit zum Einschwingen ist Teil der Rechnung. Hier wird nichts mit argmin gelöst.</p></section></div>
+</div><div class="side">
+ <div class="panel"><div class="panelhead"><strong>Motorsteuerung</strong><small id="counts"></small></div><section class="pad"><div class="actions"><button class="btn primary" id="play">⏸ Pause</button><button class="btn" id="impulse">↝ Impuls</button><button class="btn" id="reset">↺ Reset</button></div><div class="scrollmotors" id="motors"></div><div class="twos" style="margin-top:12px"><button class="btn" id="add">+ Motor</button><button class="btn warn" id="remove">− Motor</button></div></section></div>
+ <div class="panel"><div class="panelhead"><strong>Getriebe lernen</strong><small>Parameter physikalisch interpretierbar</small></div><section class="pad"><div class="actions" style="margin-bottom:12px"><button class="btn primary" id="learned">Erlerntes Preset</button><button class="btn" id="fresh">Standard</button><button class="btn" id="load">JSON laden</button><button class="btn" id="save">JSON exportieren</button></div><input id="file" type="file" accept=".json,application/json"><div class="couple"><div class="subhead" id="selection">Kopplung auswählen</div><small id="edgeinfo">Tippe im Raum auf eine Verbindung, um Steifigkeit und Übersetzung direkt zu ändern. Die Rotoren behalten ihre Zustände.</small><div class="top"><span>Federsteifigkeit k</span><span class="badge" id="kv">–</span></div><input type="range" min="0.01" max="3" step="0.01" value="0.3" id="stiff" disabled><div class="top"><span>Übersetzungsverhältnis |r|</span><span class="badge" id="rv">–</span></div><input type="range" min="0.5" max="1.5" step="0.01" value="1" id="ratio" disabled></div><div class="notice" style="margin-top:12px"><b style="color:#e3f0ff">Was wird trainiert?</b> Positive Steifigkeiten, vorzeichenbehaftete Getriebeübersetzungen, positive nichtlineare Federanteile und Motorkalibrierungen. <b style="color:#e3f0ff">Wie?</b> Offline durch Gradienten über die simulierte Bewegung. Die Laufzeitphysik selbst löst kein Optimierungsproblem.</div></section></div>
+ <div class="panel"><div class="panelhead"><strong>Experiment</strong><small>Wiederholbare Eingriffe</small></div><section class="pad"><div class="notice">1. Erlerntes Preset laden.<br>2. Motor 1 oder 2 bewegen.<br>3. V₀, Energie und Auslesung beobachten.<br>4. Kopplung anklicken und verändern.<br>5. Motor hinzufügen/entfernen: alte Winkel und Geschwindigkeiten bleiben erhalten.</div><div class="status" id="status" role="status">Mechanik läuft. V₀ hat keinen eigenen Antrieb.</div></section></div>
+</div></div>
+<div class="bottom"><div class="panel"><div class="panelhead"><strong>Mechanische Berechnung</strong><small>Semimplizite Integration</small></div><section class="pad"><div class="formula">eᵢⱼ = θᵢ + rᵢⱼ θⱼ
+Uᵢⱼ = ½ kᵢⱼ eᵢⱼ² + ¼ qᵢⱼ eᵢⱼ⁴
+τᵢⱼ = −∂Uᵢⱼ/∂θᵢ
+I θ̈ᵢ + b θ̇ᵢ = τᵢ + τMotor
+θᵥ₀(t + Δt) entsteht durch Bewegung.</div></section></div><div class="panel"><div class="panelhead"><strong>Forschungsgrenzen</strong><small>Ungefiltert</small></div><section class="pad"><p class="explain">Die Simulation verkörpert mehrstufige proportionale Kopplungen. Sie ist noch keine real gefertigte mechanische Rechenmaschine und kein bewiesener KI-Ersatz. Ihr Offline-Training ist weiterhin digitale Optimierung; nur die Vorwärtsrechnung wird als dynamisches Getriebenetz abgebildet. Komplexe Kopplungen und längere Einschwingzeiten können Vorteile wieder aufheben.</p><p class="explain">Das experimentelle <b>V₀</b> ist passiv und steht nicht unter direkter Motorsteuerung. Eindeutigkeit im stationären Zustand hängt von ausreichend geerdeter, positiv steifer Netzstruktur ab. In dieser Topologie ist sie für den linearen Anteil gegeben.</p></section></div></div>
+</main><script>/* INLINE_ENGINE */</script><script>
+/* LEARNED_PRESET */
+(function(){'use strict';const E=globalThis.HDRMotorEngine,$=id=>document.getElementById(id),svgNS='http://www.w3.org/2000/svg';
+let model=E.createDefault(),state=E.makeState(model),targets=[.8,-.75,.35,-.2,.6,-.45],running=true,selected=-1,history=[],last=0,frame=0;
+const loadedPreset=globalThis.HDR_LEARNED_PRESET||null;
+function inform(t){$('status').textContent=t;}
+function el(name,attrs,parent){const x=document.createElementNS(svgNS,name);for(const [k,v] of Object.entries(attrs))x.setAttribute(k,String(v));parent.append(x);return x;}
+function coords(){const loc=[];for(let i=0;i<model.n;i++){
+ const group=i%model.groups, rank=Math.floor(i/model.groups), count=Math.ceil((model.n-group)/model.groups);
+ const x=115+group*(670/Math.max(1,model.groups-1));
+ loc.push([x,90+rank*(380/Math.max(1,count-1))]);
+ }for(let g=0;g<model.groups;g++)loc.push([300+g*(300/Math.max(1,model.groups-1)),267]);loc.push([450,267]);return loc;}
+function gearpath(x,y,r=25,teeth=16){let d='';for(let j=0;j<teeth*4;j++){let a=j*Math.PI*2/(teeth*4),rr=j%4===1||j%4===2?r:r-4;d+=(j?'L':'M')+(x+Math.cos(a)*rr).toFixed(1)+','+(y+Math.sin(a)*rr).toFixed(1)}return d+'Z';}
+function draw(){const parent=$('network');parent.replaceChildren();const P=coords(), C=model.channels;const kinds={pair:'#67889b',neighbor:'#69ead4',group:'#a99aff',hub:'#ffbf69'};
+ for(let j=0;j<model.edges.length;j++){
+  const e=model.edges[j],a=P[e.a],b=P[e.b],deform=state.angle[e.a][0]+e.ratio[0]*state.angle[e.b][0],mag=Math.abs(deform*e.k[0]);
+  const line=el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:kinds[e.kind],opacity:j===selected?.95:Math.min(.67,.11+mag*.3),'stroke-width':j===selected?5:Math.min(3,.8+mag), 'stroke-dasharray':e.kind==='pair'?'4 5':'none','data-edge':j},parent);
+  line.style.cursor='pointer';line.setAttribute('pointer-events','stroke');line.addEventListener('click',()=>selectEdge(j));
+ }
+ for(let i=0;i<P.length;i++){
+  const [x,y]=P[i],type=i<model.n?'motor':i<model.n+model.groups?'group':'hub';const r=type==='hub'?43:type==='group'?32:24,color=type==='hub'?kinds.hub:type==='group'?kinds.group:kinds.neighbor;
+  const g=el('g',{transform:`rotate(${state.angle[i][0]*180/Math.PI} ${x} ${y})`},parent);
+  el('path',{d:gearpath(x,y,r,type==='hub'?22:16),stroke:color,'stroke-width':type==='hub'?2.5:1.5,fill:'#142739'},g);
+  el('line',{x1:x,y1:y,x2:x+r-8,y2:y,stroke:color,'stroke-width':4,'stroke-linecap':'round'},g);
+  el('circle',{cx:x,cy:y,r:5,fill:color},g);
+  const label=i<model.n?'M'+(i+1):i<model.n+model.groups?'G'+(i-model.n+1):'V₀';
+  el('text',{x,y:y+r+19,'text-anchor':'middle',fill:color,'font-size':type==='hub'?19:13,'font-weight':700},parent).textContent=label;
+ }
+ $('hubangle').textContent=state.angle[model.n+model.groups][0].toFixed(3);
+ $('hubvel').textContent=state.velocity[model.n+model.groups][0].toFixed(3);
+ $('sensor').textContent=E.read(model,state).toFixed(3);
+ $('energy').textContent=E.energy(model,state,targets).toFixed(2);
+ $('counts').textContent=model.n+' Motoren / '+model.edges.length+' Kopplungen';
+ drawHistory();
+}
+function drawHistory(){const svg=$('chart');svg.replaceChildren();for(let j=0;j<4;j++)el('line',{x1:25,x2:790,y1:22+43*j,y2:22+43*j,stroke:'#405771',opacity:.55},svg);if(history.length<2)return;
+ const vals=history.map(x=>x.a),hi=Math.max(.1,...vals),lo=Math.min(-.1,...vals),range=hi-lo;
+ el('path',{d:history.map((p,i)=>(i?'L':'M')+(25+765*i/Math.max(1,history.length-1)).toFixed(2)+','+(155-129*(p.a-lo)/range).toFixed(2)).join(' '),fill:'none',stroke:'#ffbf69','stroke-width':2.3},svg);
+ el('text',{x:4,y:18,fill:'#96adc1','font-size':11},svg).textContent=hi.toFixed(2);
+ el('text',{x:4,y:157,fill:'#96adc1','font-size':11},svg).textContent=lo.toFixed(2);
+}
+function drawMotors(){let box=$('motors');box.replaceChildren();for(let i=0;i<model.n;i++){
+ const outer=document.createElement('div');outer.className='motor';
+ const top=document.createElement('div');top.className='top';top.innerHTML='<b>M'+(i+1)+'</b>';
+ const span=document.createElement('span');span.className='badge';span.textContent=targets[i].toFixed(2)+' rad';top.append(span);
+ const inp=document.createElement('input');inp.type='range';inp.min='-1.8';inp.max='1.8';inp.step='.01';inp.value=targets[i];inp.setAttribute('aria-label','Motor '+(i+1));inp.addEventListener('input',()=>{targets[i]=Number(inp.value);span.textContent=targets[i].toFixed(2)+' rad'});
+ outer.append(top,inp);box.append(outer);
+}}
+function selectEdge(index){selected=index;const edge=model.edges[index];$('selection').textContent=edge.kind.toUpperCase()+' · '+(edge.a+1)+' → '+(edge.b+1);
+ $('edgeinfo').textContent='Alle '+model.channels+' physischen Kanäle werden mit diesen Reglern gleichzeitig justiert.';
+ $('stiff').disabled=false;$('ratio').disabled=false;
+ $('stiff').value=String(Math.min(3,edge.k[0]));$('ratio').value=String(Math.abs(edge.ratio[0]));
+ $('kv').textContent=edge.k[0].toFixed(2);$('rv').textContent=edge.ratio[0].toFixed(2);
+}
+$('stiff').addEventListener('input',()=>{if(selected<0)return;const e=model.edges[selected],v=Number($('stiff').value);for(let c=0;c<model.channels;c++)e.k[c]=v;$('kv').textContent=v.toFixed(2);});
+$('ratio').addEventListener('input',()=>{if(selected<0)return;const e=model.edges[selected],v=Number($('ratio').value),sign=Math.sign(e.ratio[0])||1;for(let c=0;c<model.channels;c++)e.ratio[c]=sign*v;$('rv').textContent=(sign*v).toFixed(2);});
+function useModel(m){try {const validated=E.validated(m);model=JSON.parse(JSON.stringify(validated));state=E.makeState(model);targets=Array.from({length:model.n},(_,i)=>i<6?[.8,-.75,.35,-.2,.6,-.45][i]:0);selected=-1;history=[];drawMotors();draw();inform('Modell geladen. Motorzustand beginnt bei null; Parameter bleiben während der Bewegung unverändert.');}catch(error){inform('Import nicht möglich: '+error.message);}}
+$('learned').onclick=()=>loadedPreset?useModel(loadedPreset):inform('Kein trainiertes Preset eingebettet. Trainiere in Python und baue die HTML-Datei neu.');
+$('fresh').onclick=()=>useModel(E.createDefault());
+$('play').onclick=()=>{running=!running;$('play').textContent=running?'⏸ Pause':'▶ Start';};
+$('impulse').onclick=()=>{targets=targets.map((v,i)=>Math.max(-1.7,Math.min(1.7,v+(i%2?-.48:.48))));drawMotors();inform('Impuls! Prüfe die Verzögerung zwischen Motoren und V₀.')};
+$('reset').onclick=()=>{state=E.makeState(model);history=[];draw();inform('Rotorzustände zurückgesetzt. Gelernte Getriebeparameter unverändert.')};
+$('add').onclick=()=>{try{const x=E.resize(model,state,targets,model.n+1);({model,state,targets}=x);targets[targets.length-1]=.5;selected=-1;drawMotors();inform('Motor hinzugefügt: Winkel und Geschwindigkeit der bestehenden Rotoren erhalten. Neue Verbindungen starten mit Standardwerten.');}catch(e){inform(e.message);}};
+$('remove').onclick=()=>{try{const x=E.resize(model,state,targets,model.n-1);({model,state,targets}=x);selected=-1;drawMotors();inform('Motor entfernt: verbleibende Rotoren behalten ihren Zustand.');}catch(e){inform(e.message);}};
+$('load').onclick=()=>$('file').click();
+$('file').onchange=async event=>{try{const file=event.target.files[0];if(!file)return;if(file.size>1024*1024)throw Error('JSON-Datei zu groß');useModel(JSON.parse(await file.text()));}catch(e){inform('Dateifehler: '+e.message)}event.target.value='';};
+$('save').onclick=()=>{const blob=new Blob([JSON.stringify(model,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='hdr_motor_gears.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+function tick(t){const d=last?Math.min(.08,(t-last)/1000):.016;last=t;if(running){const steps=Math.max(1,Math.min(7,Math.round(d/model.dt)));for(let i=0;i<steps;i++)E.step(model,state,targets);
+  if(frame++%3===0){history.push({t:state.time,a:state.angle[model.n+model.groups][0]});if(history.length>210)history.shift();}}
+ draw();requestAnimationFrame(tick);}
+window.HDRLab={get model(){return model},get state(){return state},get targets(){return targets},get running(){return running},get selected(){return selected},reset:()=>{state=E.makeState(model);},pause:()=>{running=false},step:(n=1)=>E.evolve(model,state,targets,n),load:useModel};
+drawMotors();requestAnimationFrame(tick);
+})();
+</script></body></html>
