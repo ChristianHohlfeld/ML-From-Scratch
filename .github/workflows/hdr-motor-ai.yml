@@ -1,0 +1,21 @@
+name: HDR Motor AI CI
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -e './research/hdr-motor-ai[test]'
+      - run: pytest -q research/hdr-motor-ai/tests
+      - run: node research/hdr-motor-ai/tests/browser_engine.test.cjs
+      - run: python research/hdr-motor-ai/scripts/build_web.py --check
+      - run: cd research/hdr-motor-ai && python -m hdr_motor_ai.train --task group_contrast --epochs 2 --steps 12 --train-samples 64 --val-samples 32 --test-samples 32 --output /tmp/hdr-ci-smoke
