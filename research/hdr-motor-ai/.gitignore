@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pt
+runs/
+*.log
+.DS_Store
