@@ -1,4 +1,4 @@
-/* HDR Motor AI v0.3 - exact mechanical network in ordinary JavaScript.
+/* HDR Motor AI v0.4 - exact mechanical network in ordinary JavaScript.
  * No CDN, no frameworks, no optimizer, no periodic recalculation of V0.
  * Can run in browser or Node.js. Parameter units: radians, seconds, normalized torque.
  */
@@ -41,7 +41,7 @@ function validated(model) {
 }
 function makeState(m) { validated(m);const total=m.n+m.groups+1;return {angle:Array.from({length:total},()=>zero(m.channels)),velocity:Array.from({length:total},()=>zero(m.channels)),time:0};}
 function checkState(m,s,targets){if(!s ||s.angle?.length!==m.n+m.groups+1||s.velocity?.length!==s.angle.length||targets.length!==m.n||targets.some(v=>!Number.isFinite(v)||Math.abs(v)>5))throw Error('Invalid state or input');}
-function step(m,s,targets,dt=m.dt){checkState(m,s,targets);if(!Number.isFinite(dt)||dt<=0||dt>.05)throw Error('Unsafe dt');
+function step(m,s,targets,dt=m.dt,teacher=null){checkState(m,s,targets);if(!Number.isFinite(dt)||dt<=0||dt>.05)throw Error('Unsafe dt');
   const total=m.n+m.groups+1, C=m.channels;
   const torque=Array.from({length:total},()=>zero(C));
   for(const e of m.edges)for(let c=0;c<C;c++){
@@ -50,6 +50,8 @@ function step(m,s,targets,dt=m.dt){checkState(m,s,targets);if(!Number.isFinite(d
     torque[e.a][c]-=stress;torque[e.b][c]-=e.ratio[c]*stress;
   }
   for(let i=0;i<m.n;i++)for(let c=0;c<C;c++)torque[i][c]+=m.motorStiffness*(targets[i]*m.gain[i][c]+m.bias[i][c]-s.angle[i][c]);
+  if(teacher){if(!Number.isFinite(teacher.beta)||teacher.beta<=0||teacher.beta>2||!Number.isFinite(teacher.target)||Math.abs(teacher.target)>3)throw Error("Unsafe teaching force");
+    torque[m.n+m.groups][0]+=teacher.beta*(teacher.target-s.angle[m.n+m.groups][0]);}
   for(let i=0;i<total;i++)for(let c=0;c<C;c++){
     const acceleration=(torque[i][c]-m.damping*s.velocity[i][c])/m.inertia;
     s.velocity[i][c]+=dt*acceleration;
@@ -89,6 +91,44 @@ function resize(model,state,targets,newN){
  const inputs=targets.slice(0,newN);while(inputs.length<newN)inputs.push(0);
  return {model:next,state:ns,targets:inputs};
 }
-const api={createDefault,validated,makeState,step,evolve,read,energy,resize};
+/* Two-phase locally measured plasticity: free phase, weak supervised nudge,
+ * then each gear updates based only on its two endpoints' angles and its k/q/r.
+ * No backpropagation, no global solver, no target torque during inference.
+ * This deliberately uses single-channel readout (theta[V0][0]); other channels
+ * of a pretrained v0.3 model remain unchanged.
+ */
+function trainLocal(m,s,targets,desired,options={}){
+ validated(m);checkState(m,s,targets);
+ const {steps=260,beta=.5,lr=1,learnKinds=['pair','neighbor','group','hub']}=options;
+ if(!Number.isInteger(steps)||steps<1||steps>2000||!Number.isFinite(desired)||Math.abs(desired)>3||
+    !Number.isFinite(beta)||beta<=0||beta>2||!Number.isFinite(lr)||lr<=0||lr>20)throw Error('Unsafe local learning parameters');
+ const free={angle:s.angle.map(v=>[...v]),velocity:s.velocity.map(v=>[...v]),time:s.time};
+ evolve(m,free,targets,steps);
+ const nudged={angle:free.angle.map(v=>[...v]),velocity:free.velocity.map(v=>[...v]),time:free.time};
+ for(let i=0;i<steps;i++)step(m,nudged,targets,m.dt,{beta,target:desired});
+ let changed=0;
+ const span=.45;
+ const clip=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+ for(const e of m.edges){
+   if(!learnKinds.includes(e.kind))continue;
+   const c=0, k=e.k[c], q=e.cubic[c],r=e.ratio[c];
+   const ef=free.angle[e.a][c]+r*free.angle[e.b][c];
+   const en=nudged.angle[e.a][c]+r*nudged.angle[e.b][c];
+   const dk=.5*k*(en*en-ef*ef)/beta;
+   const dq=.25*q*(en**4-ef**4)/beta;
+   const signed=Math.sign(r)||1;
+   const val=clip((Math.abs(r)-1)/span,-.995,.995);
+   const z=Math.atanh(val);
+   const derivative=signed*span*(1-Math.tanh(z)**2);
+   const gr=(((k*en+q*en**3)*nudged.angle[e.b][c])-((k*ef+q*ef**3)*free.angle[e.b][c]))*derivative/beta;
+   e.k[c]=clip(k*Math.exp(-lr*clip(dk,-2,2)),.002,8);
+   e.cubic[c]=clip(q*Math.exp(-lr*clip(dq,-1,1)),.0002,.55);
+   e.ratio[c]=signed*(1+span*Math.tanh(clip(z-lr*clip(gr,-2,2),-3,3)));
+   changed++;
+ }
+ return {freeV0:free.angle[m.n+m.groups][0],nudgedV0:nudged.angle[m.n+m.groups][0],
+         changed,freeState:free,teacher:desired};
+}
+const api={createDefault,validated,makeState,step,evolve,read,energy,resize,trainLocal};
 root.HDRMotorEngine=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
