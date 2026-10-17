@@ -1,6 +1,61 @@
-# HDR Motor AI v0.3 · Physical Learning Lab
+# HDR Motor AI v0.4 · Local Physical Learning Lab
 
 **Status:** Experimental numerical implementation of a *physically inspired* analog-computing architecture, with trainable mechanical couplings and a passive reference rotor `V₀`. This is an independent research prototype; it is **not** a hardware build, a language model, or an established improvement over Transformers.
+
+
+## v0.4: mechanism learns locally, not through backpropagation
+
+**Core contribution**: supervised two-phase equilibrium propagation (EP) applied to the SAME elastic gear network as v0.3. At inference, the motor inputs drive the rotating shafts, and V₀ is entirely undriven. During **training only**, a weak physical teaching spring is temporarily coupled to V₀. Every elastic connection changes its own stiffness, cubic coefficient and gear ratio based exclusively on **the change in strain at its two endpoints between free and nudged phases**. There are no global gradients or BPTT used for this local learning; the phase dynamics are still numerically simulated.
+
+This approach is related to established equilibrium propagation / contrastive physical-learning literature; **it is not claimed as a new discovery of EP**. This project evaluates its suitability for the HDR-inspired all-to-all/neighbour/group/V₀ gear topology. No evidence of hardware energy or speed advantage is claimed.
+
+**Exact two-phase rule**, link `a–b`, channel `c`:
+
+```text
+e = θ_a + r θ_b                       (local link extension)
+E_link = ½ k e² + ¼ q e⁴             (local passive energy)
+free:       inertia dynamics → θ⁰    (V₀ no drive)
+nudged:     same dynamics + β(t−θ_V₀) torque at V₀ (training only)
+Δ log k = −η (k/2β) (e_β² − e_0²)
+Δ log q = −η (q/4β) (e_β⁴ − e_0⁴)
+Δ z     = −η/β [((k e_β + q e_β³) θ_b,β − (k e_0 + q e_0³) θ_b,0) ∂r/∂z]
+r = sign ⋅ [1 + span ⋅ tanh(z)]
+```
+
+This is an approximation of the equilibrium gradient for *sufficiently relaxed* phases and small teaching strength `β`. Finite numbers of dynamic steps and finite `β` introduce bias. The controller also needs to provide the teacher value `t`; there is no claim that the apparatus learns without supervised feedback. Tests compare the local formulas to static partial derivatives calculated by autograd *only in tests*, and verify no `p.grad` is generated during learning.
+
+### Experiments / reproducibility
+
+```bash
+python -m pip install -e '.[test]'
+python -m pytest -q tests
+node tests/browser_engine.test.cjs
+python scripts/build_web.py --check
+python -m hdr_motor_ai.local_train --task group_contrast --epochs 12 --output results/v04/group_seed7
+python -m hdr_motor_ai.local_train --task group_contrast --epochs 12 --no-learning --output results/v04/group_control
+python -m hdr_motor_ai.local_train --task nonlinear_relation --epochs 28 --train-samples 512 --baseline-epochs 28 --free-steps 300 --nudged-steps 300 --output results/v04/nonlinear_seed7
+PYTHONPATH=. python scripts/calibration_study.py --seed 2 --epochs 50 --lr 1 --steps 260 --output results/v04/calibration
+PYTHONPATH=. python scripts/calibration_study.py --seed 3 --epochs 32 --lr 1 --steps 260 --output results/v04/calibration_seed3
+PYTHONPATH=. python scripts/calibration_study.py --seed 4 --epochs 32 --lr 1 --steps 260 --output results/v04/calibration_seed4
+```
+
+**Calibration**: fixed randomly distorted teacher mechanism generates target V₀ angles; student sees motor commands and supervised teacher readout, but never teacher's gear settings. Inputs are split train/validation/test, with checkpoints chosen by *validation* MSE.
+
+| Calibration seed | Untuned held-out MSE | After local EP | Error reduction |
+|---|---:|---:|---:|
+| 2 | 0.0083785 | 0.0019927 | **76.2%** |
+| 3 | 0.0037739 | 0.0022851 | **39.4%** |
+| 4 | 0.0037875 | 0.0024136 | **36.3%** |
+
+**Hard controls, same simple classification task** (group contrast, seed 7): local EP: **99.2%**, *never train any link* control: **99.2%**, baseline MLP: **99.6%**. Thus this task provides **no demonstrated learning gain**. Nonlinear relation task: local EP: **43.8%**, MLP: **92.2%** — a substantial failure for current mechanical representation.
+
+The local calibration experiment establishes learnability on a controlled synthetic physical system, **not** language understanding, reasoning, compression, low energy consumption or superiority to Transformers. Numerical simulation is much slower than the MLP here; local learning is measured in tens of CPU seconds against milliseconds for an MLP. Cross-seed variability is material.
+
+**Browser:** `dist/motor_lab.html` includes a new *Lokale Lernphase* panel. Moving a slider changes a motor's target; pressing *Lokal lernen* teaches a chosen desired V₀ angle using the JS implementation of two-phase local EP. It does **not** reset the ongoing rotor positions and velocities. Teacher force is applied only to an isolated teaching-phase copy. The browser demo trains its first physical channel; Python EP study uses one channel for an unambiguous V₀ sensor. Previous 3-channel v0.3 presets remain usable.
+
+**Known limitations / falsifiability**: supervised signal must arrive at V₀, two relaxation phases are costly, no real on-device adjustable compliant gears exist, initialization can already solve easy problems, stable time-step selection matters, and the current topology cannot yet solve nonlinear XOR-like tasks. Next meaningful frontier: build and instrument a physical 2–3-rotor elastically coupled prototype and compare *measured* total power/latency against CPU simulation with equal accuracy targets.
+
+---
 
 ## Idea
 
@@ -44,7 +99,7 @@ V₀ output = readout_bias + Σ_c readout_weight_c * θ_V₀,c
 
 `V₀` has **no motor torque**. The dynamics are integrated by a fixed-step semi-implicit Euler method; previous angle and velocity are retained while targets change. Positive `k`, `q`, `b` and `I` give a nonnegative energy function and dissipative continuous-time system. The selected graph plus motor grounding makes the **linear static stiffness matrix positive definite**, so a unique static equilibrium exists for constant inputs; nevertheless the **actual behavior is transient**, is numerically stepped rather than directly solved, and may take time to settle.
 
-**Important nuance:** The ratio and stiffness can be learned, but the current **training procedure is digital** (backpropagation through simulated mechanical time). There is no claimed purely mechanical on-device learning mechanism or physically fabricated tunable gear yet. These learned constants are *mechanically interpretable* designs for a future prototype.
+**Important nuance:** The ratio and stiffness can be learned. The v0.3 path trains them digitally with backpropagation; the **v0.4 local EP** alternative uses two mechanical phases with a teaching signal and no gradients through the whole network. Both are simulated digitally; no physical self-adjusting hardware is built. These learned constants are *mechanically interpretable* designs for a future prototype.
 
 ## Run it
 
@@ -52,7 +107,7 @@ V₀ output = readout_bias + Σ_c readout_weight_c * θ_V₀,c
 
 Open [`dist/motor_lab.html`](dist/motor_lab.html) in Chrome, Safari, Firefox or mobile. It is a **single self-contained HTML file** with the identical JS physics engine used in parity tests. Its **Erlerntes Preset** button loads a real trained `group_contrast` model embedded in the HTML. Drag motor target sliders; click connection lines to adjust `k` and `|r|` live; add/remove motors while preserving existing shaft angles and angular velocities. JSON import/export supported.
 
-Manual changes made in the browser are **physical adjustments**, not online gradient training. When a new motor is added, only new couplings receive default constants; all retained couplings keep their existing learned values.
+Manual slider changes are physical adjustments. The new local teaching panel can also update the individual couplers in the browser from two simulated dynamical phases, with no BPTT. When a new motor is added, only new couplings receive default constants; all retained couplings keep their existing learned values.
 
 ### 2. Train / compare
 
