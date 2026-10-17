@@ -1,0 +1,24 @@
+{
+  "version": "0.4.0",
+  "task": "group_contrast",
+  "seed": 7,
+  "train_examples": 256,
+  "val_examples": 256,
+  "test_examples": 512,
+  "steps_per_phase": [
+    260,
+    260
+  ],
+  "beta": 0.15,
+  "lr": 0.15,
+  "local_learning": true,
+  "epochs": 12,
+  "baseline_epochs": 16,
+  "ep_best_validation_accuracy": 0.99609375,
+  "ep_test_accuracy": 0.9921875,
+  "mlp_test_accuracy": 0.99609375,
+  "ep_train_seconds": 4.053,
+  "mlp_train_seconds": 0.031,
+  "method": "Two-phase local equilibrium propagation; supervised V0 teacher torque during nudged phase only; NO backpropagation for gear learning",
+  "limitations": "Simulated on CPU, not physical hardware; finite settling and discrete time can bias local EP gradients."
+}
