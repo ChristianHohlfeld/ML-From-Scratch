@@ -44,7 +44,15 @@ def test_desktop_and_mobile_interactions():
                 assert page.locator('#stiff').is_enabled()
                 page.locator('#stiff').evaluate("el => { el.value='1.65'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
                 assert page.evaluate('window.HDRLab.model.edges[window.HDRLab.selected].k[0]') == pytest.approx(1.65)
-                page.screenshot(path=str(ROOT/'results'/f'v03_{label}.png'),full_page=True)
+                # Train once and verify local couplers change while the running rotor state is preserved.
+                previous=page.evaluate('window.HDRLab.model.edges[26].k[0]')
+                page.locator('#teach').evaluate("el => { el.value='-0.75'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
+                page.locator('#train_local').click()
+                assert 'Gelernte Verbindungen:' in page.locator('#teachinfo').inner_text()
+                assert page.evaluate('window.HDRLab.model.edges[26].k[0]') != pytest.approx(previous)
+                assert page.locator('#status').inner_text().startswith('Lokale Lernphase beendet')
+                (ROOT/'results'/'v04').mkdir(exist_ok=True)
+                page.screenshot(path=str(ROOT/'results'/'v04'/f'v04_{label}.png'),full_page=True)
                 assert not errors, str(errors)
                 page.close()
         finally:

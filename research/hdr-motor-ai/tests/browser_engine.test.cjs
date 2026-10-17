@@ -22,3 +22,21 @@ let changed=E.makeState(model);E.evolve(model,changed,u,80);let a=changed.angle[
 let e=model.edges.find(x=>x.kind==='hub');e.k=[3,3,3];
 E.evolve(model,changed,u,80);assert.notEqual(changed.angle[8][0],a);
 console.log('OK: 10+ JS engine assertions, passive V0, energy, dynamic add/remove, validation, live gears');
+
+{
+ const trainModel=E.createDefault(6,2,1);const drive=[.7,-.4,.1,-.8,.35,-.25];
+ const trainState=E.makeState(trainModel);E.evolve(trainModel,trainState,drive,80);
+ const beforeAngle=trainState.angle.map(a=>[...a]),beforeVelocity=trainState.velocity.map(a=>[...a]);
+ const oldGears=trainModel.edges.map(e=>({...e,k:[...e.k],ratio:[...e.ratio],cubic:[...e.cubic]}));
+ const result=E.trainLocal(trainModel,trainState,drive,0.6,{steps:280,beta:0.5,lr:2});
+ assert.equal(result.changed,trainModel.edges.length);
+ assert.ok(Math.abs(result.nudgedV0-result.freeV0)>0.001,'V0 receives teacher force only during training');
+ assert.deepEqual(trainState.angle,beforeAngle,'training does not reset ongoing rotor positions');
+ assert.deepEqual(trainState.velocity,beforeVelocity,'training does not reset rotor velocities');
+ assert.ok(trainModel.edges.some((e,j)=>Math.abs(e.k[0]-oldGears[j].k[0])>1e-8));
+ assert.ok(trainModel.edges.every(e=>e.k[0]>0&&e.cubic[0]>=0&&e.ratio[0]!==0));
+ assert.doesNotThrow(()=>E.validated(trainModel));
+ assert.throws(()=>E.trainLocal(trainModel,trainState,drive,0.6,{steps:0}),/Unsafe/);
+ assert.throws(()=>E.step(trainModel,trainState,drive,trainModel.dt,{target:0.6,beta:100}),/Unsafe/);
+}
+console.log('OK: local two-phase learning, teacher isolation, state retention, bounds');
