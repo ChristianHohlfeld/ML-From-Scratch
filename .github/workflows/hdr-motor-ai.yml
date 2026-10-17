@@ -17,5 +17,6 @@ jobs:
       - run: pip install -e './research/hdr-motor-ai[test]'
       - run: pytest -q research/hdr-motor-ai/tests
       - run: node research/hdr-motor-ai/tests/browser_engine.test.cjs
+      - run: cd research/hdr-motor-ai && python -m hdr_motor_ai.local_train --task group_contrast --epochs 1 --baseline-epochs 1 --train-samples 16 --val-samples 16 --test-samples 16 --free-steps 60 --nudged-steps 60 --output /tmp/hdr-local-smoke
       - run: python research/hdr-motor-ai/scripts/build_web.py --check
       - run: cd research/hdr-motor-ai && python -m hdr_motor_ai.train --task group_contrast --epochs 2 --steps 12 --train-samples 64 --val-samples 32 --test-samples 32 --output /tmp/hdr-ci-smoke
