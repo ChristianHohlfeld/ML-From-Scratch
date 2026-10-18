@@ -1,0 +1,29 @@
+name: HDR WaveForm v0.2 · 3D acoustics
+on:
+  push:
+    paths:
+      - 'research/hdr-motor-ai/voice-topology-v02/**'
+      - '.github/workflows/hdr-waveform-v02.yml'
+  pull_request:
+    paths:
+      - 'research/hdr-motor-ai/voice-topology-v02/**'
+      - '.github/workflows/hdr-waveform-v02.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: research/hdr-motor-ai/voice-topology-v02
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -e '.[test]'
+      - run: python -m pytest -q
+      - run: node --test tests/test_engine.cjs
+      - run: python scripts/build.py
+      - run: python -c "from pathlib import Path; p=Path('dist/index.html'); assert p.stat().st_size > 18000; assert b'/*__ENGINE__*/' not in p.read_bytes()"

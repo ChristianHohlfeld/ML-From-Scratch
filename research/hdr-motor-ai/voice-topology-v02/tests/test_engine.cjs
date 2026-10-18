@@ -1,0 +1,10 @@
+const test=require('node:test');const assert=require('node:assert/strict');
+const W=require('../web/engine.js');
+const s={controls:[.72,1.21,.7,1.27],length:.168,aspect:.88,rod:false};
+test('true three-dimensional fluid domain',()=>{let g=W.generate(s,22,15,15);assert.equal(g.mask.length,22*15*15);assert.ok(g.mask.reduce((a,b)=>a+b,0)>100);assert.ok(g.mask.reduce((a,b)=>a+b,0)<g.mask.length);});
+test('3D CFL is stable and signals finite',()=>{let r=W.simulate(s,{steps:420,nx:22,ny:15,nz:15});assert.ok(r.cfl<1);assert.ok(r.signal.every(Number.isFinite));assert.ok(r.frames.length>2);});
+test('changing shape alters 3D propagated signal',()=>{let a=W.simulate(s,{steps:850,nx:25,ny:15,nz:15});let b=W.simulate({...s,controls:[1.4,.6,1.4,.6]},{steps:850,nx:25,ny:15,nz:15});assert.ok(a.signal.some((x,i)=>Math.abs(x-b.signal[i])>1e-6));});
+test('central rod changes volume topology and signature',()=>{let a=W.generate(s),b=W.generate({...s,rod:true});assert.ok(b.mask.reduce((a,v)=>a+v,0)<a.mask.reduce((a,v)=>a+v,0));});
+test('spectrum signature normalizes',()=>{let q=W.signature(W.simulate(s,{steps:600,nx:22,ny:15,nz:15}));assert.ok(Math.abs(Math.hypot(...q)-1)<1e-7);});
+test('determinism',()=>{let a=W.simulate(s,{steps:240,nx:20,ny:13,nz:13});let b=W.simulate(s,{steps:240,nx:20,ny:13,nz:13});assert.deepEqual([...a.signal],[...b.signal]);});
+test('geometry out of scale still physically explicit',()=>{let a=W.generate({...s,length:.15});let b=W.generate({...s,length:.2});assert.ok(a.dx<b.dx);assert.deepEqual(Array.from(a.mask),Array.from(b.mask));});
