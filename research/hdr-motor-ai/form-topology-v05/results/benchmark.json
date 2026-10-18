@@ -1,0 +1,135 @@
+{
+  "experiment": "HDR 3D surface spring-wave vs invariants",
+  "synthetic": true,
+  "seed": 20261018,
+  "n_per_class": 36,
+  "train": 72,
+  "test": 72,
+  "classes": [
+    "sphere",
+    "torus",
+    "two_spheres",
+    "dumbbell"
+  ],
+  "mesh_invariants": {
+    "sphere": {
+      "components": 1,
+      "euler": 2,
+      "first_betti": 0,
+      "watertight": true
+    },
+    "torus": {
+      "components": 1,
+      "euler": 0,
+      "first_betti": 2,
+      "watertight": true
+    },
+    "two_spheres": {
+      "components": 2,
+      "euler": 4,
+      "first_betti": 0,
+      "watertight": true
+    },
+    "dumbbell": {
+      "components": 1,
+      "euler": 2,
+      "first_betti": 0,
+      "watertight": true
+    }
+  },
+  "matched_vertices": 96,
+  "metrics": {
+    "coupled_wave": 0.8888888888888888,
+    "shuffled_wave_edges": 0.5416666666666666,
+    "geometry_baseline": 1.0,
+    "exact_topology_baseline": 0.75
+  },
+  "confusions": {
+    "coupled_wave": {
+      "sphere": {
+        "sphere": 17,
+        "torus": 0,
+        "two_spheres": 0,
+        "dumbbell": 1
+      },
+      "torus": {
+        "sphere": 0,
+        "torus": 18,
+        "two_spheres": 0,
+        "dumbbell": 0
+      },
+      "two_spheres": {
+        "sphere": 0,
+        "torus": 0,
+        "two_spheres": 18,
+        "dumbbell": 0
+      },
+      "dumbbell": {
+        "sphere": 7,
+        "torus": 0,
+        "two_spheres": 0,
+        "dumbbell": 11
+      }
+    },
+    "shuffled_wave_edges": {
+      "sphere": {
+        "sphere": 4,
+        "torus": 6,
+        "two_spheres": 0,
+        "dumbbell": 8
+      },
+      "torus": {
+        "sphere": 2,
+        "torus": 13,
+        "two_spheres": 0,
+        "dumbbell": 3
+      },
+      "two_spheres": {
+        "sphere": 0,
+        "torus": 0,
+        "two_spheres": 15,
+        "dumbbell": 3
+      },
+      "dumbbell": {
+        "sphere": 6,
+        "torus": 5,
+        "two_spheres": 0,
+        "dumbbell": 7
+      }
+    },
+    "geometry_baseline": {
+      "sphere": {
+        "sphere": 18,
+        "torus": 0,
+        "two_spheres": 0,
+        "dumbbell": 0
+      },
+      "torus": {
+        "sphere": 0,
+        "torus": 18,
+        "two_spheres": 0,
+        "dumbbell": 0
+      },
+      "two_spheres": {
+        "sphere": 0,
+        "torus": 0,
+        "two_spheres": 18,
+        "dumbbell": 0
+      },
+      "dumbbell": {
+        "sphere": 0,
+        "torus": 0,
+        "two_spheres": 0,
+        "dumbbell": 18
+      }
+    }
+  },
+  "note": "Accuracy here only means classifying four generated closed mesh families under geometric warps; not full geometric reasoning, language comprehension, or arbitrary topology.",
+  "limitations": [
+    "Sphere and dumbbell have exactly the same topological invariants, so an exact-topology-only baseline necessarily confuses them.",
+    "A spring-wave sensor on the mesh is not a volumetric soft-body acoustic fluid simulation.",
+    "A classifier downstream of the wave network is still ordinary machine learning.",
+    "All shapes are procedurally generated; no scanned real-world objects.",
+    "Edges are randomly split to an equal 96 vertices per shape; continuous warps preserve topology. No occlusion or noisy real measurements."
+  ]
+}
