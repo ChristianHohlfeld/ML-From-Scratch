@@ -30,16 +30,28 @@ def detect_homography(frame):
     for poly,ind in zip(corners,ids.ravel()):
         if int(ind) in MARKER_MM:
             if int(ind) in pts:raise ValueError('Ambiguous duplicate calibration marker')
-            pts[int(ind)]=np.mean(poly[0],axis=0)
+            pts[int(ind)]=poly[0]
     if set(pts)!=set(MARKER_MM):raise ValueError(f'Board incomplete: {sorted(pts)}')
-    pix=np.array([pts[k] for k in range(4)],dtype=np.float32)
-    mm=np.array([MARKER_MM[k] for k in range(4)],dtype=np.float32)
-    if cv.contourArea(pix.reshape(-1,1,2))<4000:raise ValueError('Calibration markers too small')
-    H=cv.getPerspectiveTransform(pix,mm)
+    centres=np.array([np.mean(pts[k],axis=0) for k in range(4)],dtype=np.float32)
+    if cv.contourArea(centres.reshape(-1,1,2))<4000:
+        raise ValueError('Calibration markers too small')
+    pixel=[];world=[]
+    # All SIXTEEN corners provide redundant constraints. Unlike a homography
+    # built from only four centres, the reprojection residual is now a real
+    # fit statistic and can reject warped/curled or badly detected printouts.
+    for k in range(4):
+        cx,cy=MARKER_MM[k]
+        pixel.extend(pts[k].tolist())
+        world.extend([[cx-12,cy+12],[cx+12,cy+12],
+                      [cx+12,cy-12],[cx-12,cy-12]])
+    pix=np.asarray(pixel,dtype=np.float32)
+    mm=np.asarray(world,dtype=np.float32)
+    H,_=cv.findHomography(pix,mm,method=0)
+    if H is None:raise ValueError('Homography could not be estimated')
     mapped=cv.perspectiveTransform(pix[None,:,:],H)[0]
     err=float(np.linalg.norm(mapped-mm,axis=1).max())
-    if not (np.isfinite(H).all() and np.linalg.cond(H)<1e10 and err<0.25):
-        raise ValueError('Unstable calibration')
+    if not (np.isfinite(H).all() and np.linalg.cond(H)<1e10 and err<1.5):
+        raise ValueError(f'Unstable calibration residual: {err:.3f} mm')
     return H,err
 
 

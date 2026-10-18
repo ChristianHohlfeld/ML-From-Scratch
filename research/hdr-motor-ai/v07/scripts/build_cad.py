@@ -15,7 +15,7 @@ def build():
         if res.returncode!=0:raise RuntimeError(f'{part} CAD generation failed: {res.stderr[-1200:]}')
         if out.stat().st_size<1000:raise RuntimeError(f'Empty {part} STL')
         try:import trimesh
-        except ImportError: raise RuntimeError('Install trimesh to validate STL solidity')
+        except ImportError: raise RuntimeError('Install trimesh and networkx to validate STL solidity')
         mesh=trimesh.load(out,force='mesh')
         if not(mesh.is_watertight and len(mesh.split(only_watertight=False))==1 and mesh.volume>0):
             raise RuntimeError(f'Nonmanifold or disconnected {part} STL')

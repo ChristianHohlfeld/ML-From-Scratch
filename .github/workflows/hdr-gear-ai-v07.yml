@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq openscad
-      - run: python -m pip install -e '.[vision]' trimesh
+      - run: python -m pip install -e '.[vision]' trimesh networkx
       - run: python -m unittest discover -s tests -p 'test_*.py' -v
       - run: python scripts/create_board.py
       - run: python scripts/digital_twin.py
