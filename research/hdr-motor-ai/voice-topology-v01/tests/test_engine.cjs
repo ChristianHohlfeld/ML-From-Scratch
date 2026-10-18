@@ -1,0 +1,10 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');
+const code=fs.readFileSync('dist/engine.js','utf8');const window={};vm.runInNewContext(code,{window,Float32Array,Float64Array,Math,Array,Set,Map,BigInt,Error,Uint8Array,Number});
+const E=window.HDRVoice;
+test('standalone browser exports wave engine',()=>assert.ok(E&&E.signature));
+test('source filter produces sound',()=>{const s=E.synth('a',135,5);assert.equal(s.length,4000);assert.ok(Array.from(s).every(Number.isFinite));});
+test('signature includes all wave groups',()=>{const f=E.signature(E.synth('i',210),8000);assert.equal(f.wave.length,52);assert.equal(f.topology.length,84);assert.equal(f.couplings.length,15);assert.equal(f.combined.length,175);});
+test('silence fails closed',()=>assert.throws(()=>E.signature(new Float32Array(4000),8000)));
+test('approximate loudness invariance',()=>{const a=E.synth('u',130);const f=E.signature(a,8000),g=E.signature(Float32Array.from(a,v=>v*.25),8000);assert.ok(E.distFeatures(f,g,'combined')<.02);});
+test('a filled triangle has no loop',()=>{const t=E.betti([[0,0,0],[1,0,0],[0,1,0]]);assert.equal(t.at(-1),0);});
+test('different vowel forms have nonzero distance',()=>{const a=E.signature(E.synth('a',130),8000),b=E.signature(E.synth('i',130),8000);assert.ok(E.distFeatures(a,b,'energy')>.05);});

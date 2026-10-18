@@ -1,0 +1,50 @@
+{
+  "dataset": "Toy synthetic voiced source-filter vowels a,e,i,o,u",
+  "split": "Train pitches 98..170 Hz; test pitches 205..255 Hz; independent randomized phases/noise",
+  "test_samples_per_seed": 20,
+  "baseline": "Nearest neighbour, per-feature standardized distance; 26-value MFCC baseline",
+  "limitation": "Not real speech, 3D anatomy, an LLM, or evidence of superiority",
+  "results": {
+    "geometry": {
+      "mean": 0.3,
+      "per_seed": [
+        0.15,
+        0.4,
+        0.35
+      ]
+    },
+    "topology": {
+      "mean": 0.48333333333333334,
+      "per_seed": [
+        0.35,
+        0.65,
+        0.45
+      ]
+    },
+    "energy": {
+      "mean": 1.0,
+      "per_seed": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "coupled": {
+      "mean": 0.5333333333333333,
+      "per_seed": [
+        0.5,
+        0.55,
+        0.55
+      ]
+    },
+    "mfcc": {
+      "mean": 0.9333333333333332,
+      "per_seed": [
+        0.9,
+        0.95,
+        0.95
+      ]
+    }
+  },
+  "duration_seconds": 9.15
+}
