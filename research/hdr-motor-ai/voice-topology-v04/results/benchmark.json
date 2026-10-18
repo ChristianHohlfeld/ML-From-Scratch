@@ -1,0 +1,121 @@
+{
+  "version": "HDR WaveForm v0.4",
+  "claim": "linearized bidirectional 3D acoustic pressure and XYZ soft membrane",
+  "limitations": [
+    "same numerical model produces both synthetic reference and reconstructed responses",
+    "no experimental voice data",
+    "fixed voxel fluid mask and small deformation approximation",
+    "no automatic topology change or global uniqueness proof",
+    "no comparative evidence for general intelligence"
+  ],
+  "config": {
+    "steps": 950,
+    "nx": 24,
+    "ny": 13,
+    "nz": 13,
+    "nphi": 12,
+    "frames": 1
+  },
+  "cases": [
+    {
+      "case": 0,
+      "target_controls": [
+        0.7,
+        1.25,
+        0.85,
+        1.3
+      ],
+      "target_lobes": [
+        0.18,
+        -0.12
+      ],
+      "fit_lobes": [
+        -0.0025488844074579714,
+        -0.10410196624968455
+      ],
+      "fit_controls": [
+        0.7046799508875965,
+        1.1826392400508468,
+        0.9213893077113345,
+        1.248653382050206
+      ],
+      "evals": 49,
+      "training_before": 0.00025064891432839226,
+      "training_after": 3.2944459303708155e-06,
+      "unseen_signal_before": 0.0005582482031814915,
+      "unseen_signal_after": 4.899256193605261e-06,
+      "heldout_gain_percent": 99.12238746749492,
+      "rigid_same_geometry_heldout": 0.01165218029157328,
+      "shape_parameter_mae": 0.06553725910927531
+    },
+    {
+      "case": 1,
+      "target_controls": [
+        1.33,
+        0.74,
+        1.2,
+        0.73
+      ],
+      "target_lobes": [
+        -0.2,
+        0.16
+      ],
+      "fit_lobes": [
+        -0.000509626905129068,
+        0.0
+      ],
+      "fit_controls": [
+        0.6780132762513826,
+        0.9418627676721051,
+        1.248653382050206,
+        0.874326691025103
+      ],
+      "evals": 49,
+      "training_before": 0.00043748327468114985,
+      "training_after": 6.03791986800321e-05,
+      "unseen_signal_before": 0.001053676190389234,
+      "unseen_signal_after": 7.456147892460311e-05,
+      "heldout_gain_percent": 92.92368190486874,
+      "rigid_same_geometry_heldout": 0.009049389418243,
+      "shape_parameter_mae": 0.2343866562651504
+    },
+    {
+      "case": 2,
+      "target_controls": [
+        0.81,
+        1.31,
+        1.23,
+        0.79
+      ],
+      "target_lobes": [
+        0.12,
+        0.2
+      ],
+      "fit_lobes": [
+        -0.13196601125010515,
+        0.0
+      ],
+      "fit_controls": [
+        0.6429800730753091,
+        1.3636865985901707,
+        1.105673308974897,
+        1.0677930656121757
+      ],
+      "evals": 49,
+      "training_before": 0.0006239777741063315,
+      "training_after": 6.157334726561293e-05,
+      "unseen_signal_before": 0.0013007352917590105,
+      "unseen_signal_after": 3.375765669748108e-05,
+      "heldout_gain_percent": 97.4047250880823,
+      "rigid_same_geometry_heldout": 0.01143846949452103,
+      "shape_parameter_mae": 0.17913204890037424
+    }
+  ],
+  "summary": {
+    "mean_gain_percent": 96.48359815348199,
+    "mean_shape_parameter_mae": 0.1596853214249333,
+    "mean_unseen_error_before": 0.0009708865617765787,
+    "mean_unseen_error_after": 3.773946393856315e-05
+  },
+  "runtime_seconds": 5.89
+}

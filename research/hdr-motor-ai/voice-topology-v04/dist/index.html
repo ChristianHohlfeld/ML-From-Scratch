@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HDR · WaveForm 3D</title><style>
+:root{color-scheme:dark;--bg:#0a1017;--panel:#121b25;--line:#273645;--ink:#edf5fa;--muted:#92a7b4;--mint:#45e0bd;--amber:#fac073;--rose:#fa7990}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,sans-serif;margin:0}button,input{font:inherit}
+.app{max-width:1420px;margin:auto;padding:20px;display:grid;gap:14px}.top{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}.brand{font-weight:800;letter-spacing:.05em;font-size:18px}.brand span{color:var(--mint)}.muted,.hint{color:var(--muted)}.pill{padding:6px 11px;border-radius:99px;border:1px solid var(--line);color:var(--mint);font-size:11px}.stack{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(315px,.75fr);gap:14px;align-items:start}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}.padding{padding:16px}.panel h2{margin:0 0 8px;font-size:15px}.small{font-size:12px}.stage{position:relative}canvas{display:block;width:100%}#scene{height:410px;background:linear-gradient(140deg,#131f2a,#0b141d)}.overlay{position:absolute;top:15px;left:17px;z-index:2;pointer-events:none}.overlay strong{display:block;font-size:14px}.overlay span{font-size:11px;color:var(--muted)}.legend{display:flex;gap:15px;font-size:11px;color:var(--muted);padding:10px 15px;border-top:1px solid var(--line)}.legend i{display:inline-block;width:9px;height:9px;border-radius:100%;margin-right:4px}.control{display:flex;align-items:center;gap:10px;margin:10px 0}.control label{width:96px;color:var(--muted);font-size:12px}.control output{width:38px;text-align:right;color:var(--mint);font-variant-numeric:tabular-nums}.control input{flex:1;min-width:0;accent-color:var(--mint)}.cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.preset{width:100%;cursor:pointer;background:#22313e;border:1px solid #314658;color:var(--ink);border-radius:9px;padding:9px 11px}.preset.active{border-color:var(--mint);color:var(--mint)}.primary{background:var(--mint);border:none;color:#07251e;border-radius:9px;padding:11px 14px;font-weight:750;cursor:pointer}.secondary{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:10px;cursor:pointer}.secondary:hover,.preset:hover{border-color:var(--mint)}button:disabled{cursor:progress;opacity:.5}.buttons{display:flex;gap:9px;flex-wrap:wrap}.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border-block:1px solid var(--line)}.metric{padding:15px;background:var(--panel)}.metric .val{display:block;font-size:22px;font-weight:750;font-variant-numeric:tabular-nums}.metric .muted{font-size:10px}.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}.chart{padding:14px}.chart canvas{height:160px}.chart h2{margin-bottom:5px}.foot{font-size:12px;color:var(--muted);padding:3px 2px 20px}.status{padding:10px 0;font-size:12px;color:var(--muted);min-height:35px}a{color:var(--mint)}.check{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px;margin:10px 0}.check input{accent-color:var(--mint)}.cap{color:var(--muted);font-size:11px}
+@media(max-width:860px){.stack,.charts{grid-template-columns:1fr}.app{padding:10px;gap:10px}.panel{border-radius:11px}#scene{height:330px}.top{padding:4px}.legend{gap:8px}.metrics .metric{padding:12px}.metric .val{font-size:18px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head>
+<body><div class="app">
+<header class="top"><div class="brand">HDR <span>WAVEFORM</span> <span style="font-size:11px;color:var(--muted)">v0.4</span></div><div class="muted small">Sound deforms form · form reshapes sound</div><span class="pill">3D pressure + XYZ membrane mesh · offline</span></header>
+<div class="stack">
+ <section class="panel"><div class="stage"><div class="overlay"><strong>3D membrane · coupled acoustic field</strong><span>Drag to rotate · triangular surface vertices move independently · section pressure inside</span></div><canvas id="scene" aria-label="Interactive projected three dimensional triangular soft membrane and pressure field"></canvas></div><div class="legend"><span><i style="background:var(--mint)"></i>Full 3D triangular membrane</span><span><i style="background:var(--amber)"></i>Wavefronts</span><span><i style="background:var(--rose)"></i>Internal rod / hole</span></div><div class="metrics"><div class="metric"><span class="val" id="loss">—</span><span class="muted">Spectral fit MSE</span></div><div class="metric"><span class="val" id="cfl">—</span><span class="muted">CFL stability</span></div><div class="metric"><span class="val" id="betti">1 / 0</span><span class="muted">Cross-section H₀ / H₁</span></div></div><div class="metrics" style="grid-template-columns:1fr 1fr"><div class="metric"><span class="val" id="movement">—</span><span class="muted">Max wall movement (µm)</span></div><div class="metric"><span class="val" id="effect">—</span><span class="muted">Soft vs rigid acoustic difference</span></div></div><div class="padding"><div class="buttons"><button id="play" class="primary">▶ Drive waves</button><button id="pause" class="secondary">Pause motion</button><button id="audio" class="secondary">🔊 Listen</button><button id="export" class="secondary">Export geometry</button></div><div class="status" id="status" role="status">Ready. Choose a target form, then run physical fitting.</div></div></section>
+ <section class="panel padding"><h2>Target form</h2><p class="hint small">Unknown chamber whose acoustic response we try to reproduce.</p><div class="cols"><button class="preset active" data-target="vowelA">Wide / constricted</button><button class="preset" data-target="vowelB">Narrow / open</button><button class="preset" data-target="smooth">Smooth tube</button><button class="preset" data-target="annular">Annular tube</button><button class="preset" data-target="asymmetric">3D asymmetric</button></div><h2>Our machine · adjustable soft form</h2><div id="sliders"></div><h2 style="margin-top:15px">Angular 3D surface modes</h2><div id="lobeSliders"></div><h2 style="margin-top:15px">Physical wall feedback</h2><label class="check"><input id="wallEnabled" type="checkbox" checked> Enable local pressure ↔ XYZ vertex coupling</label><div class="control"><label for="stiffness">Wall stiffness</label><input id="stiffness" type="range" min="800000" max="6000000" step="100000" value="2100000"><output id="wallK">2.1</output><span class="small muted">MN/m³</span></div><div class="control"><label for="damping">Wall damping</label><input id="damping" type="range" min="0" max="100" step="2" value="34"><output id="wallD">34</output></div><label class="check"><input id="rod" type="checkbox"> Include central rod (topological hole)</label><div class="buttons"><button id="fit" class="primary">Learn form from sound</button><button id="reset" class="secondary">Reset machine</button></div><p class="hint small">Learning modifies four axial controls and two circumferential rest-shape modes. Wave propagation is always calculated by the 3D solver. Topology is not inferred automatically.</p><h2 style="margin-top:18px">What is actually modeled?</h2><p class="hint small">3D acoustic pressure in an elliptical, shape-adjustable tube with reflecting walls and end damping. Broadband excitation at the inlet; acoustic microphone at the outlet. Each triangle-mesh vertex has an independently deformable XYZ position, an inertial mass and axial/angular spring coupling. Local voxel pressure pushes along the surface normal; the resulting surface flux changes local pressure at each acoustic timestep. Linearized moving-boundary FSI still uses fixed air voxels, so this is NOT full finite-deformation fluid remeshing, contact or real vocal-tract validation.</p></section>
+</div>
+<div class="charts"><section class="panel chart"><h2>Sound signature</h2><p class="cap">Acoustic transfer magnitude: target (amber) vs recovered (mint).</p><canvas id="spectra"></canvas></section><section class="panel chart"><h2>Simulated microphone &amp; wall motion</h2><p class="cap">3D pressure field integrated over the outlet cross-section.</p><canvas id="wave"></canvas><p class="cap">Waveform (mint) and normalized wall motion (amber). Display amplitudes separately normalized.</p></section></div>
+<footer class="foot">Research prototype, not human anatomical reconstruction. Rest geometry also has two independent angular deformation modes. The triangulated wall has 3 Cartesian displacement coordinates per vertex, but is modeled as a linearized fixed-grid membrane; displayed deformation is strongly exaggerated. A single recorded waveform does not uniquely determine vocal-tract geometry. <a href="https://github.com/ChristianHohlfeld/ML-From-Scratch/tree/master/research/hdr-motor-ai/voice-topology-v04">Source / methods / tests</a>. The target and learner use the same forward model; synthetic success cannot establish real-world validity.</footer>
+</div>
+<script>/* HDR WaveForm v0.4 — 3D membrane+3D acoustic FDTD. MIT.
+   True 3D pressure voxels, deformable 3D triangular membrane with vector displacements.
+   Reciprocal pressure-force and displacement-flux terms; linearized voxel FSI.
+*/
+(function(root,factory){const lib=factory();if(typeof module==='object'&&module.exports)module.exports=lib;else root.WaveForm=lib;})(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';
+const SOUND_SPEED=343, TAU=2*Math.PI;
+const base=(s)=>({controls:(s?.controls||[.88,1.15,.72,1.08]).slice(),length:s?.length||.168,aspect:s?.aspect||.88,rod:!!s?.rod,lobes:(s?.lobes||[0,0]).slice()});
+function generate(s={},nx=34,ny=19,nz=19,extent=.084){
+ const shape=base(s); const dx=shape.length/(nx-1),dy=extent/(ny-1),dz=extent/(nz-1),N=nx*ny*nz;
+ const mask=new Uint8Array(N), radial=new Float64Array(nx), area=new Float64Array(nx), ry=new Float64Array(nx), rz=new Float64Array(nx);
+ const points=[1,...shape.controls,1];
+ for(let x=0;x<nx;x++){
+  let u=5*x/(nx-1),j=Math.min(4,Math.floor(u));radial[x]=points[j]*(1-(u-j))+points[j+1]*(u-j);
+ }
+ const smooth=radial.slice(); for(let x=0;x<nx;x++)radial[x]=(smooth[Math.max(0,x-2)]+4*smooth[Math.max(0,x-1)]+6*smooth[x]+4*smooth[Math.min(nx-1,x+1)]+smooth[Math.min(nx-1,x+2)])/16;
+ for(let x=0;x<nx;x++){
+  ry[x]=.019*radial[x];rz[x]=ry[x]*shape.aspect;area[x]=Math.PI*ry[x]*rz[x];
+  for(let y=0;y<ny;y++)for(let z=0;z<nz;z++){
+   const yy=-extent/2+y*dy,zz=-extent/2+z*dz;
+   const t=Math.atan2(zz/rz[x],yy/ry[x]),thickness=1+Math.sin(Math.PI*x/(nx-1))*(shape.lobes[0]*Math.cos(2*t)+shape.lobes[1]*Math.sin(3*t));
+   const isFluid=Math.hypot(yy/ry[x],zz/rz[x])<=thickness && (!shape.rod || yy*yy+zz*zz>=.0055**2);
+   mask[(x*ny+y)*nz+z]=isFluid?1:0;
+  }
+ }
+ const nphi=16, cell=new Int32Array(nx*nphi),normal=new Float64Array(nx*nphi*3),patch=new Float64Array(nx*nphi),rest=new Float64Array(nx*nphi*3),triangles=[];
+ const idx=(x,y,z)=>(x*ny+y)*nz+z;
+ for(let x=0;x<nx;x++)for(let j=0;j<nphi;j++){
+  const th=j*TAU/nphi,cs=Math.cos(th),sn=Math.sin(th),n=x*nphi+j;
+  const envelope=Math.sin(Math.PI*x/(nx-1)),rr=1+envelope*(shape.lobes[0]*Math.cos(2*th)+shape.lobes[1]*Math.sin(3*th));
+  const dr=envelope*(-2*shape.lobes[0]*Math.sin(2*th)+3*shape.lobes[1]*Math.cos(3*th));
+  const yy=ry[x]*rr*cs,zz=rz[x]*rr*sn,yp=ry[x]*(dr*cs-rr*sn),zp=rz[x]*(dr*sn+rr*cs);
+  rest[3*n]=x*dx;rest[3*n+1]=yy;rest[3*n+2]=zz;
+  const len=Math.hypot(yp,zp);normal[3*n+1]=zp/len;normal[3*n+2]=-yp/len;
+  patch[n]=dx*TAU/nphi*len;
+  let found=false;
+  for(const factor of [.90,.80,.65,.50,0]){
+   const iy=Math.max(0,Math.min(ny-1,Math.round((factor*yy+extent/2)/dy)));
+   const iz=Math.max(0,Math.min(nz-1,Math.round((factor*zz+extent/2)/dz)));
+   if(mask[idx(x,iy,iz)]){cell[n]=idx(x,iy,iz);found=true;break;}
+  }
+  if(!found)throw Error('Surface node lacks interior voxel');
+ }
+ for(let x=0;x<nx-1;x++)for(let j=0;j<nphi;j++){
+  const a=x*nphi+j,b=x*nphi+(j+1)%nphi,c=(x+1)*nphi+j,d=(x+1)*nphi+(j+1)%nphi;
+  triangles.push(a,c,b,b,c,d);
+ }
+ return {shape,nx,ny,nz,nphi,N,dx,dy,dz,mask,radial,area,ry,rz,cell,normal,patch,rest,triangles};
+}
+function driveSignal(steps,dt,variant='chirp'){
+ const x=new Float64Array(steps),last=(steps-1)*dt;
+ for(let n=0;n<steps;n++){
+  const t=n*dt,fade=Math.sin(Math.PI*n/(steps-1))**2;
+  if(variant==='chirp')x[n]=fade*Math.sin(TAU*(330*t+.5*(3900-330)/last*t*t));
+  else if(variant==='multitone')x[n]=fade*(Math.sin(TAU*470*t)+.6*Math.sin(TAU*1160*t+.4)+.45*Math.sin(TAU*2520*t+.8));
+  else if(variant==='impulse')x[n]=Math.exp(-.5*((n-Math.floor(steps/14))/10)**2);
+  else throw Error('unknown excitation');
+ }
+ return x;
+}
+function simulate(s, {steps=1250,nx=28,ny=15,nz=15,nphi=16,excitation='chirp',frames=14,wall={},drive:givenDrive=null}={}){
+ if(nphi!==16)throw Error('Browser engine uses 16 surface sectors');
+ const g=generate(s,nx,ny,nz),{N,mask,dx,dy,dz,cell,normal,patch}=g;
+ const dt=.40/(SOUND_SPEED*Math.sqrt(1/dx**2+1/dy**2+1/dz**2));
+ const cfl=SOUND_SPEED*dt*Math.sqrt(1/dx**2+1/dy**2+1/dz**2),rho=1.2,K=rho*SOUND_SPEED**2,vol=dx*dy*dz;
+ const w={enabled:true,mass:.14,stiffness:2.1e6,damping:34,tension:3,loss:8,gain:.35,...wall};
+ if(!(w.mass>0&&w.stiffness>0&&w.damping>=0&&w.tension>=0&&w.loss>=0&&w.gain>=0))throw Error('Nonpassive wall parameters');
+ const spacing=Math.min(dx,...patch.map(q=>q/dx));
+ if(Math.sqrt(w.stiffness/w.mass+8*w.tension/(w.mass*spacing**2))*dt>.23)throw Error('Surface CFL');
+ const drive=givenDrive ? Float64Array.from(givenDrive) : driveSignal(steps,dt,excitation);
+ if(drive.length!==steps || !drive.every(Number.isFinite))throw Error('Invalid drive');
+ const signal=new Float64Array(steps),wallTrace=new Float64Array(steps),asymmetryTrace=new Float64Array(steps),energy=new Float64Array(steps);
+ const p=new Float64Array(N),vx=new Float64Array((nx-1)*ny*nz),vy=new Float64Array(nx*(ny-1)*nz),vz=new Float64Array(nx*ny*(nz-1));
+ const U=new Float64Array(nx*nphi*3),V=new Float64Array(U.length),flux=new Float64Array(N),pstride=ny*nz;
+ const idx=(x,y,z)=>(x*ny+y)*nz+z;
+ const snapshots=[],frameN=Math.max(1,frames|0);
+ for(let t=0;t<steps;t++){
+  for(let x=0;x<nx-1;x++)for(let y=0;y<ny;y++)for(let z=0;z<nz;z++){
+   const i=idx(x,y,z),q=i+pstride;vx[i]=mask[i]&&mask[q]?vx[i]-dt/(rho*dx)*(p[q]-p[i]):0;
+  }
+  for(let x=0;x<nx;x++)for(let y=0;y<ny-1;y++)for(let z=0;z<nz;z++){
+   const i=idx(x,y,z),q=i+nz,j=(x*(ny-1)+y)*nz+z;
+   vy[j]=mask[i]&&mask[q]?vy[j]-dt/(rho*dy)*(p[q]-p[i]):0;
+  }
+  for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)for(let z=0;z<nz-1;z++){
+   const i=idx(x,y,z),q=i+1,j=(x*ny+y)*(nz-1)+z;
+   vz[j]=mask[i]&&mask[q]?vz[j]-dt/(rho*dz)*(p[q]-p[i]):0;
+  }
+  if(w.enabled){
+   flux.fill(0); const prev=U.slice();
+   for(let x=1;x<nx-1;x++)for(let j=0;j<nphi;j++){
+    const jp=(j+1)%nphi,jm=(j+nphi-1)%nphi,n=x*nphi+j,ni=3*n,ii=cell[n],arcl=Math.max(1e-5,patch[n]/dx),cs=(TAU/nphi/arcl)**2;
+    for(let d=0;d<3;d++){
+     const ax=(prev[ni-3*nphi+d]-2*prev[ni+d]+prev[ni+3*nphi+d])/(dx*dx);
+     const az=(prev[3*(x*nphi+jm)+d]-2*prev[ni+d]+prev[3*(x*nphi+jp)+d])*cs;
+     const acc=(normal[ni+d]*p[ii]-w.stiffness*prev[ni+d]-w.damping*V[ni+d]+w.tension*(ax+az))/w.mass;
+     V[ni+d]+=dt*acc;
+    }
+   }
+   for(let x=1;x<nx-1;x++)for(let j=0;j<nphi;j++){
+    const n=x*nphi+j,ni=3*n;let dv=0;
+    for(let d=0;d<3;d++){U[ni+d]+=dt*V[ni+d];dv+=V[ni+d]*normal[ni+d];}
+    flux[cell[n]]+=patch[n]/vol*dv;
+   }
+  }
+  for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)for(let z=0;z<nz;z++){
+   const i=idx(x,y,z);if(!mask[i])continue;let div=0;
+   if(x<nx-1)div+=vx[i]/dx;if(x>0)div-=vx[i-pstride]/dx;
+   if(y<ny-1)div+=vy[(x*(ny-1)+y)*nz+z]/dy;
+   if(y>0)div-=vy[(x*(ny-1)+y-1)*nz+z]/dy;
+   if(z<nz-1)div+=vz[(x*ny+y)*(nz-1)+z]/dz;
+   if(z>0)div-=vz[(x*ny+y)*(nz-1)+z-1]/dz;
+   p[i]=(1-w.loss*dt)*p[i]-K*dt*(div+(w.enabled?flux[i]:0))+(x===2?w.gain*drive[t]:0);
+  }
+  let sum=0,num=0;for(let y=0;y<ny;y++)for(let z=0;z<nz;z++)if(mask[idx(nx-4,y,z)]){sum+=p[idx(nx-4,y,z)];num++;}
+  signal[t]=sum/Math.max(1,num);
+  const mid=Math.floor(nx/2);let radial=0,asym=0;
+  for(let j=0;j<nphi;j++)for(let d=0;d<3;d++)radial+=U[3*(mid*nphi+j)+d]*normal[3*(mid*nphi+j)+d];
+  asym=U[3*(mid*nphi)+1]-U[3*(mid*nphi+nphi/2)+1];
+  wallTrace[t]=radial/nphi;asymmetryTrace[t]=asym;
+  let E=0;for(let i=0;i<N;i++)if(mask[i])E+=.5*p[i]*p[i]/K*vol;
+  for(let i=0;i<vx.length;i++)E+=.5*rho*vx[i]*vx[i]*vol;
+  for(let i=0;i<vy.length;i++)E+=.5*rho*vy[i]*vy[i]*vol;
+  for(let i=0;i<vz.length;i++)E+=.5*rho*vz[i]*vz[i]*vol;
+  if(w.enabled)for(let x=1;x<nx-1;x++)for(let j=0;j<nphi;j++){
+   const n=x*nphi+j,ni=3*n,im=3*(x*nphi+(j+nphi-1)%nphi),ix=ni-3*nphi,dl=Math.max(1e-5,patch[n]/dx);
+   for(let d=0;d<3;d++){
+    E+=.5*patch[n]*(w.mass*V[ni+d]**2+w.stiffness*U[ni+d]**2);
+    E+=.5*w.tension*patch[n]*((U[ni+d]-U[ix+d])**2/dx**2+(U[ni+d]-U[im+d])**2/dl**2);
+   }
+  }
+  energy[t]=E;
+  if(t===steps-1 || snapshots.length<frameN && t>=Math.floor((snapshots.length+1)*steps/(frameN+1))-1){
+   const panel=new Float32Array(nx*ny),disp=new Float32Array(U.length),z=Math.floor(nz/2);
+   disp.set(U);for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)panel[x*ny+y]=p[idx(x,y,z)];
+   snapshots.push({step:t,panel,wall:disp});
+  }
+ }
+ let maxWall=0;for(let n=0;n<U.length/3;n++)maxWall=Math.max(maxWall,Math.hypot(U[3*n],U[3*n+1],U[3*n+2]));
+ if(!Number.isFinite(maxWall)||maxWall>Math.min(dx,dy,dz)*.07)throw Error('Linear voxel FSI limit exceeded');
+ return {signal,drive,wallTrace,asymmetryTrace,energy,maxWall,dt,geometry:g,frames:snapshots,cfl,excitation,wall:w,displacement:U,velocity:V};
+}
+
+function dft(signal,dt,f){let re=0,im=0;const n=signal.length;const step=TAU*f*dt;for(let i=0;i<n;i++){
+ const win=.5-.5*Math.cos(TAU*i/(n-1)),a=step*i;re+=signal[i]*win*Math.cos(a);im-=signal[i]*win*Math.sin(a);
+}return Math.hypot(re,im);}
+function signature(r,bins=28){
+ const fv=new Float64Array(bins),y=new Float64Array(bins),x=new Float64Array(bins);
+ let xmax=0;
+ for(let k=0;k<bins;k++){
+  fv[k]=200*Math.pow(3900/200,k/(bins-1));x[k]=dft(r.drive,r.dt,fv[k]);y[k]=dft(r.signal,r.dt,fv[k]);xmax=Math.max(xmax,x[k]);
+ }
+ let norm=0;for(let k=0;k<bins;k++){
+  y[k]=Math.log1p(50*y[k]*x[k]/(x[k]**2+(.045*xmax)**2));norm+=y[k]*y[k];
+ }
+ norm=Math.sqrt(norm)||1;for(let k=0;k<bins;k++)y[k]/=norm;
+ return Array.from(y);
+}
+const loss=(a,b)=>a.reduce((s,v,i)=>s+(v-b[i])**2,0)/a.length;
+async function learn(target,s,options={}){
+ const onProgress=options.onProgress||(()=>{}),iterations=options.iterations||3;
+ const shape=base(s),wall=options.wall||{},stepOrder=[.25,.14,.075,.04].slice(0,iterations);
+ let cur=simulate(shape,{steps:options.steps||1300,frames:1,wall});let best=loss(signature(cur),target),before=best,evals=1;
+ for(const step of stepOrder){
+  for(let i=0;i<6;i++){
+   const lobe=i>=4,index=lobe?i-4:i;
+   let win=lobe?shape.lobes[index]:shape.controls[index],wl=best;
+   for(const direction of [-1,1]){
+    const controls=shape.controls.slice(),lobes=shape.lobes.slice();
+    if(lobe)lobes[index]=Math.max(-.25,Math.min(.25,lobes[index]+step*direction));
+    else controls[index]=Math.max(.5,Math.min(1.48,controls[index]+step*direction));
+    const v=loss(signature(simulate({...shape,controls,lobes},{steps:options.steps||1300,frames:1,wall})),target);evals++;
+    if(v<wl){win=lobe?lobes[index]:controls[index];wl=v;}
+   }
+   if(lobe)shape.lobes[index]=win;else shape.controls[index]=win;
+   best=wl;onProgress({...shape,controls:shape.controls.slice(),lobes:shape.lobes.slice(),before,after:best,evals});
+   await new Promise(resolve=>setTimeout(resolve,0));
+  }
+ }
+ return {shape,before,after:best,evals};
+}
+return {base,generate,simulate,signature,loss,learn};
+});
+</script>
+<script>
+'use strict';
+const $=x=>document.getElementById(x), W=window.WaveForm;
+const TARGETS={vowelA:{controls:[.68,1.32,.70,1.28],length:.168,aspect:.88,rod:false},vowelB:{controls:[1.3,.7,1.3,.72],length:.168,aspect:.88,rod:false},smooth:{controls:[.96,1.08,1.04,.94],length:.168,aspect:.88,rod:false},annular:{controls:[1.05,1.2,.79,1.12],length:.168,aspect:.88,rod:true},asymmetric:{controls:[.83,1.15,.78,1.17],lobes:[.22,-.16],length:.168,aspect:.88,rod:false}};
+let machine=W.base({controls:[1,1,1,1]}),target=W.base(TARGETS.vowelA),result=null,targetRecord=null,tarSig=null,running=false,frame=0,raf=0,audioContext=null;
+const SIM={steps:1050,nx:28,ny:15,nz:15,nphi:16,frames:15};
+const WALL={enabled:true,mass:.14,stiffness:2.1e6,damping:34,tension:3,loss:8,gain:.35};
+let rigidSignal=null;
+function status(t){$('status').textContent=t}
+function canvasFit(canvas){const dpr=Math.min(devicePixelRatio||1,2),b=canvas.getBoundingClientRect(),w=Math.max(1,Math.round(b.width)),h=Math.max(1,Math.round(b.height));canvas.width=w*dpr;canvas.height=h*dpr;const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return {ctx:c,w,h}}
+function refreshSliders(){[...document.querySelectorAll('#sliders > .control')].forEach((el,i)=>{el.querySelector('input').value=machine.controls[i];el.querySelector('output').textContent=Number(machine.controls[i]).toFixed(2)});[...document.querySelectorAll('#lobeSliders > .control')].forEach((el,i)=>{el.querySelector('input').value=machine.lobes[i];el.querySelector('output').textContent=Number(machine.lobes[i]).toFixed(2)});$('rod').checked=machine.rod;$('betti').textContent=machine.rod?'1 / 1':'1 / 0'}
+function makeSliders(){for(let i=0;i<4;i++){let div=document.createElement('div');div.className='control';div.innerHTML=`<label for="r${i}">Ring ${i+1}</label><input id="r${i}" type="range" min="0.50" max="1.48" step="0.01"><output></output>`;$('sliders').appendChild(div);div.querySelector('input').addEventListener('input',e=>{machine.controls[i]=+e.target.value;div.querySelector('output').textContent=machine.controls[i].toFixed(2);render(result?result.frames[frame%result.frames.length]:null)});div.querySelector('input').addEventListener('change',run)}for(let i=0;i<2;i++){const div=document.createElement('div');div.className='control';div.innerHTML=`<label for="l${i}">Mode ${i+1}</label><input id="l${i}" type="range" min="-0.25" max="0.25" step="0.01"><output></output>`;$('lobeSliders').appendChild(div);div.querySelector('input').oninput=e=>{machine.lobes[i]=+e.target.value;div.querySelector('output').textContent=machine.lobes[i].toFixed(2);render(result?.frames[frame])};div.querySelector('input').onchange=run;}refreshSliders()}
+function linePlot(id,series){const {ctx:c,w,h}=canvasFit($(id));c.clearRect(0,0,w,h);c.strokeStyle='#273645';c.lineWidth=1;for(let i=1;i<4;i++){c.beginPath();c.moveTo(10,i*h/4);c.lineTo(w-10,i*h/4);c.stroke()}const all=series.flatMap(s=>s.data),min=Math.min(0,...all),max=Math.max(1e-7,...all),range=max-min;
+for(const s of series){const arr=s.data;c.beginPath();for(let i=0;i<arr.length;i++){let x=10+(w-20)*i/Math.max(arr.length-1,1),y=10+(h-20)*(1-(arr[i]-min)/range);i?c.lineTo(x,y):c.moveTo(x,y)}c.strokeStyle=s.color;c.lineWidth=2;c.stroke()}}
+let viewAngle=.65,viewPitch=.16,dragX=null;
+function drawScene(snapshot){
+ const {ctx:c,w,h}=canvasFit($('scene'));c.clearRect(0,0,w,h);
+ const g=W.generate(machine,SIM.nx,SIM.ny,SIM.nz),xmin=49,xmax=w-47,cy=h*.56,span=xmax-xmin;
+ const amp=Math.min(h*.38,155), radiusScale=amp/.040, deformationGain=26000;
+ const verts=g.rest,disp=snapshot?.wall,ph=g.nphi,rot=viewAngle;
+ function project(i){
+  const x=verts[3*i]+(disp?disp[3*i]:0)*deformationGain;
+  const yy=verts[3*i+1]+(disp?disp[3*i+1]:0)*deformationGain;
+  const zz=verts[3*i+2]+(disp?disp[3*i+2]:0)*deformationGain;
+  const vertical=yy*Math.cos(rot)+zz*Math.sin(rot),depth=-yy*Math.sin(rot)+zz*Math.cos(rot);
+  return [xmin+x/g.shape.length*span+depth*radiusScale*.38,cy-vertical*radiusScale+depth*radiusScale*viewPitch,depth];
+ }
+ // 3-D softbody triangles, projected with depth ordering. No rigid precomputed shell drawing.
+ const projected=Array.from({length:verts.length/3},(_,i)=>project(i));
+ const faces=[];
+ for(let i=0;i<g.triangles.length;i+=3){
+  const a=g.triangles[i],b=g.triangles[i+1],d=g.triangles[i+2];
+  faces.push({a,b,d,z:(projected[a][2]+projected[b][2]+projected[d][2])/3});
+ }
+ faces.sort((a,b)=>a.z-b.z);
+ const panel=snapshot?.panel;let m=0;
+ if(panel)for(const z of panel)m=Math.max(m,Math.abs(z));m=Math.max(.25,m);
+ // Show the simulated mid-z-plane voxel pressure as a translucent slice behind the surface.
+ if(panel){const yyStep=radiusScale*g.dy;
+  for(let x=0;x<g.nx;x++)for(let y=0;y<g.ny;y++){
+   if(!g.mask[(x*g.ny+y)*g.nz+Math.floor(g.nz/2)])continue;
+   const val=panel[x*g.ny+y],al=.10+.37*Math.min(1,Math.abs(val)/m);
+   c.fillStyle=val>=0?`rgba(250,192,115,${al})`:`rgba(87,171,244,${al})`;
+   const px=xmin+x/(g.nx-1)*span,py=cy-(y-(g.ny-1)/2)*yyStep*Math.cos(rot);
+   c.fillRect(px,py,Math.max(2,span/(g.nx-1)),Math.max(2,yyStep*.8));
+  }
+ }
+ for(const f of faces){
+  const a=projected[f.a],b=projected[f.b],d=projected[f.d];
+  const alpha=.075+.28*(.5+f.z/.055),opacity=Math.max(.055,Math.min(.40,alpha));
+  c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.lineTo(d[0],d[1]);c.closePath();
+  c.fillStyle=`rgba(69,224,189,${opacity})`;c.fill();
+  c.strokeStyle=`rgba(109,239,220,${Math.max(.12,opacity+.14)})`;c.lineWidth=.7;c.stroke();
+ }
+ c.strokeStyle='#fac073';c.lineWidth=2;c.beginPath();c.arc(xmin+2/(g.nx-1)*span,cy,4,0,2*Math.PI);c.stroke();
+ c.fillStyle='#92a7b4';c.font='11px system-ui';c.fillText('SOURCE',14,h-18);c.fillText('MICROPHONE',Math.max(20,w-104),h-18);
+ if(g.shape.rod){c.strokeStyle='#fa7990';c.lineWidth=3;c.beginPath();c.moveTo(xmin,cy);c.lineTo(xmax,cy);c.stroke();}
+}
+$('scene').style.touchAction='none';
+$('scene').addEventListener('pointerdown',e=>{dragX={x:e.clientX,y:e.clientY,a:viewAngle,p:viewPitch};$('scene').setPointerCapture(e.pointerId)});
+$('scene').addEventListener('pointermove',e=>{if(!dragX)return;viewAngle=dragX.a+(e.clientX-dragX.x)*.014;viewPitch=Math.max(-.7,Math.min(.7,dragX.p+(e.clientY-dragX.y)*.004));drawScene(result?.frames[frame]);});
+$('scene').addEventListener('pointerup',()=>{dragX=null});$('scene').addEventListener('pointercancel',()=>{dragX=null});
+const TAU=2*Math.PI;
+function render(snap){drawScene(snap);if(!result)return;linePlot('spectra',[{data:tarSig,color:'#fac073'},{data:W.signature(result),color:'#45e0bd'}]);const sig=Array.from(result.signal),m=Math.max(1e-6,...sig.map(Math.abs)),u=Array.from(result.wallTrace),um=Math.max(1e-12,...u.map(Math.abs));linePlot('wave',[{data:sig.filter((_,i)=>i%3===0).map(x=>x/m),color:'#45e0bd'},{data:u.filter((_,i)=>i%3===0).map(x=>x/um),color:'#fac073'}]);$('cfl').textContent=result.cfl.toFixed(3);$('loss').textContent=W.loss(W.signature(result),tarSig).toFixed(5);$('movement').textContent=(result.maxWall*1e6).toFixed(3);if(rigidSignal){let diff=0,base=0;for(let i=0;i<result.signal.length;i++){diff+=(result.signal[i]-rigidSignal[i])**2;base+=rigidSignal[i]**2;}$('effect').textContent=(100*Math.sqrt(diff/(base||1))).toFixed(1)+' %'} }
+function loop(){if(!running||!result)return;frame=(frame+1)%result.frames.length;render(result.frames[frame]);raf=requestAnimationFrame(()=>setTimeout(loop,60))}
+function stop(){running=false;cancelAnimationFrame(raf)}
+function run(){stop();try{result=W.simulate(machine,{...SIM,wall:WALL});rigidSignal=W.simulate(machine,{...SIM,frames:1,wall:{...WALL,enabled:false}}).signal;frame=0;render(result.frames[0]);status(`Physical solution computed · ${SIM.steps} 3D wave steps · ${result.geometry.mask.reduce((a,b)=>a+b,0)} active voxels.`)}catch(e){status('Simulation error: '+e.message)}}
+function targetChange(name){target=W.base(TARGETS[name]);document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('active',b.dataset.target===name));targetRecord=W.simulate(target,{...SIM,wall:{...WALL,enabled:true,stiffness:2.1e6,damping:34}});tarSig=W.signature(targetRecord);status('Unknown target generated from 3D physical wave simulation. Fit the source geometry.');run()}
+async function fit(){const btn=$('fit');btn.disabled=true;stop();status('Fitting actual 3D chamber; evaluating alternative shapes through wave simulation…');const startShape=W.base(machine);
+ try{const r=await W.learn(tarSig,startShape,{steps:SIM.steps,iterations:3,wall:WALL,onProgress:s=>{machine.controls=s.controls.slice();machine.lobes=s.lobes.slice();refreshSliders();status(`Physical shape search: ${s.evals} wave simulations · loss ${s.after.toFixed(5)}`)}});machine=W.base(r.shape);refreshSliders();run();status(`Completed ${r.evals} full 3D wave simulations · training mismatch ${r.before.toFixed(5)} → ${r.after.toFixed(5)}. This does not establish unique shape recovery.`)}catch(e){status('Fitting error: '+e.message)}finally{btn.disabled=false}}
+function listen(){if(!result)return;try{const ac=audioContext||(audioContext=new (window.AudioContext||window.webkitAudioContext)());ac.resume();const src=ac.createBuffer(1,result.signal.length,1/result.dt),data=src.getChannelData(0);let mx=1e-6;for(let v of result.signal)mx=Math.max(mx,Math.abs(v));for(let i=0;i<data.length;i++)data[i]=result.signal[i]/mx*.8;const node=ac.createBufferSource();node.buffer=src;node.connect(ac.destination);node.playbackRate.value=Math.max(.07,Math.min(1,ac.sampleRate*result.dt));node.start();status('Playing normalized synthetic microphone pressure (browser resampling).')}catch(e){status('Audio unavailable: '+e.message)}}
+function save(){const blob=new Blob([JSON.stringify({schema:'hdr-waveform-v04',geometry:machine,wall:WALL,excitation:'chirp',grid:SIM,cfl:result?.cfl,topology:{h0:1,h1:Number(machine.rod)}},null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hdr-acoustic-shape.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+window.addEventListener('resize',()=>render(result?.frames[frame]));$('play').onclick=()=>{if(!result)run();if(!running){running=true;loop()}};$('pause').onclick=stop;$('fit').onclick=fit;$('reset').onclick=()=>{machine=W.base({controls:[1,1,1,1],lobes:[0,0]});refreshSliders();run()};$('rod').onchange=e=>{machine.rod=e.target.checked;refreshSliders();run()};$('audio').onclick=listen;$('export').onclick=save;document.querySelectorAll('[data-target]').forEach(b=>b.onclick=()=>targetChange(b.dataset.target));
+$('wallEnabled').onchange=e=>{WALL.enabled=e.target.checked;run()};$('stiffness').oninput=e=>{$('wallK').textContent=(+e.target.value/1e6).toFixed(1)};$('stiffness').onchange=e=>{WALL.stiffness=+e.target.value;run()};$('damping').oninput=e=>{$('wallD').textContent=e.target.value};$('damping').onchange=e=>{WALL.damping=+e.target.value;run()};makeSliders();targetChange('vowelA');
+</script></body></html>
