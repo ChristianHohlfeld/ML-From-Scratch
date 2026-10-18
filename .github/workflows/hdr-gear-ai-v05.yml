@@ -1,0 +1,25 @@
+name: HDR Gear AI v0.5 tests
+on:
+  push:
+    paths: ['research/hdr-motor-ai/v05/**']
+  pull_request:
+    paths: ['research/hdr-motor-ai/v05/**']
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: research/hdr-motor-ai/v05
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - run: node --test tests/engine.test.cjs
+      - run: python scripts/build_web.py
+      - run: python -c "from pathlib import Path; assert Path('dist/gear_lab.html').stat().st_size > 15000"
