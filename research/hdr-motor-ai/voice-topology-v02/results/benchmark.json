@@ -1,0 +1,81 @@
+{
+  "protocol": "Full 3D FDTD, 4 variable radii, fixed 3D tube topology/length/ellipse aspect; train chirp, held-out multitone; comparison to untrained flat 3D tube. Entire study uses synthetic outputs of the same discretized simulator.",
+  "num_cases": 3,
+  "cases": [
+    {
+      "case": "A wide-narrow",
+      "truth": [
+        0.69,
+        1.25,
+        0.72,
+        1.3
+      ],
+      "recovered": [
+        0.8972071524323336,
+        1.3573412451505766,
+        0.8299721061738653,
+        1.3769892867288012
+      ],
+      "baseline_train_mse": 0.0017785741904718677,
+      "learned_train_mse": 4.0622684113813496e-05,
+      "baseline_test_l2": 0.10199423539264708,
+      "learned_test_l2": 0.02935589630883609,
+      "train_evaluations": 140,
+      "seconds": 3.834,
+      "holdout_improvement_pct": 71.21808286926733
+    },
+    {
+      "case": "B subtle",
+      "truth": [
+        0.95,
+        1.14,
+        0.9,
+        1.05
+      ],
+      "recovered": [
+        1.033302769269236,
+        1.0470431053358003,
+        0.9986894582747201,
+        1.0321544925962376
+      ],
+      "baseline_train_mse": 4.892008628464855e-05,
+      "learned_train_mse": 3.163617951260782e-06,
+      "baseline_test_l2": 0.013697273655283098,
+      "learned_test_l2": 0.010224502156932299,
+      "train_evaluations": 70,
+      "seconds": 1.818,
+      "holdout_improvement_pct": 25.353742545775425
+    },
+    {
+      "case": "C alternating",
+      "truth": [
+        1.32,
+        0.66,
+        1.3,
+        0.72
+      ],
+      "recovered": [
+        1.4054590121349804,
+        1.3370199269246907,
+        0.9395182966406509,
+        1.319424305945853
+      ],
+      "baseline_train_mse": 0.0021241419708308874,
+      "learned_train_mse": 0.0001747410209766744,
+      "baseline_test_l2": 0.13848876865742746,
+      "learned_test_l2": 0.039210390277788,
+      "train_evaluations": 140,
+      "seconds": 3.952,
+      "holdout_improvement_pct": 71.68695291473006
+    }
+  ],
+  "mean_holdout_improvement_pct": 56.0862594432576,
+  "mean_target_geometry_parameter_absolute_error": 0.20972411403853067,
+  "notes": [
+    "Tuned inverse problem, NOT measured human anatomy",
+    "Distinct shapes may be acoustically indistinguishable with one sensor",
+    "Cross-sectional H1 is supplied by the shape parameter, not inferred from acoustic data",
+    "FDTD walls reflect; quasi-static shape updates, not a fully two-way deforming soft-body",
+    "Dimensionless pressure amplitude; no hardware calibration or energy-efficiency claims"
+  ]
+}
