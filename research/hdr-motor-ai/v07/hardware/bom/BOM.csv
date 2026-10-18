@@ -1,0 +1,16 @@
+item,quantity,description,expected_parameters,notes
+SG90 micro servo,2,9g positional servo,5V 180 degree nominal,verify angular travel and dimensions for YOUR units
+ESP32 development board,1,3.3V I2C controller,GPIO21 SDA GPIO22 SCL,USB only supplies microcontroller
+PCA9685 breakout,1,16-channel PWM driver,3.3V logic and external 5V servo bus,address 0x40
+5V power supply,1,regulated DC supply,5V >=2A with overcurrent protection,no servo current from ESP32 USB
+INA219 breakout,1,optional high-side power meter,default shunt 0.1 ohm 3.2A range,CHANGE I2C ADDRESS to 0x41; do not exceed shunt rating
+USB cable,1,ESP32 serial and power,115200 baud,USB common ground
+M2 screws and nuts,10,servo flanges and horn fasteners,mounting hardware matching purchased horns,measure and fit
+Cable ties,4,strain relief and servo restraint,2.5mm width,do not let wiring snag joint
+3D printed base,1,base.stl,PETG or PLA,measure servo before printing
+3D printed first link,1,link1.stl,60mm shoulder-elbow,attach horn A then servo B
+3D printed second link,1,link2.stl,45mm elbow-tip,attach horn B then red target
+3D printed pen clip,1,pen.stl,4.2mm bore,optical target or sprung pen
+Red adhesive target,1,bright red dot near 4mm,visible overhead for camera,best on white background
+USB webcam,1,overhead camera,720p+ 30 fps recommended,not included: required for measured xy
+A4 printed calibration sheet,1,board.svg at 100 percent size,4 ArUco DICT_4X4_50 markers IDs 0..3,do not scale on printing

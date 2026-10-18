@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+results/hardware*.csv
+results/hardware*.json
+.DS_Store

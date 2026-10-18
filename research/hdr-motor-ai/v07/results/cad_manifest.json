@@ -1,0 +1,42 @@
+{
+  "base": {
+    "sha256": "4c689a97c4f4b493309f886d9471ad6cb5b4376712bd0218d3e72ce3e356d4e9",
+    "triangles": 2032,
+    "volume_mm3": 47342.22,
+    "size_mm": [
+      110.0,
+      85.0,
+      33.0
+    ]
+  },
+  "link1": {
+    "sha256": "f5391d3e9941811966972ddc678f3f9fec2588bf4ff62cacc01c3969d94912a1",
+    "triangles": 1464,
+    "volume_mm3": 12100.55,
+    "size_mm": [
+      89.44,
+      44.0,
+      6.0
+    ]
+  },
+  "link2": {
+    "sha256": "5fe4f668ccc91b913a9ccc19e846c32c14cd13c936f9a4505c359058a9f9c529",
+    "triangles": 1296,
+    "volume_mm3": 4740.61,
+    "size_mm": [
+      60.94,
+      17.0,
+      7.0
+    ]
+  },
+  "pen": {
+    "sha256": "30f81fe1c2af80e6eeaa52b4a85ccba98a0249450fa35c9e6db829c1b15f2335",
+    "triangles": 380,
+    "volume_mm3": 608.0,
+    "size_mm": [
+      9.0,
+      9.0,
+      11.0
+    ]
+  }
+}
