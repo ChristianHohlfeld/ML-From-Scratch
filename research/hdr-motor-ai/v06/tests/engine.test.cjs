@@ -1,0 +1,12 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'), E=require('../web/engine.js');
+const close=(a,b,eps=1e-9)=>assert.ok(Math.abs(a-b)<eps,`Expected ${a} ~= ${b}`);
+test('compound interaction cannot be additive',()=>{const m=E.truth.compound;const f=(a,b)=>E.sample(m,a,b);for(const d of [0,1])assert.ok(Math.abs(f(.4,.7)[d]-f(.4,-.6)[d]-f(-.8,.7)[d]+f(-.8,-.6)[d])>.01)});
+test('phase is the physical sum k alpha + l beta',()=>{let m=E.fit('compound',[[2,-1]]),d=new E.Drive(m);d.a=[.7,-.4];let s=d.machine.stages[0];close(d.gearAngle(s)-Math.atan2(s.a[1],s.a[0]),2*.7+.4)});
+test('structure recovers all five compound modes',()=>{let m=E.fit('compound',[]);for(let i=0;i<8;i++){const next=E.learnOne(m,'compound');m=next.machine;if(!next.changed)break;}assert.deepEqual(new Set(m.stages.map(x=>`${x.k},${x.l}`)),new Set(['1,0','0,-2','2,-1','-1,2','1,1']));assert.ok(E.testErr(m,'compound')<1e-12)});
+test('ablation without mixed cannot learn compound target',()=>{let m=E.fit('compound',[]);for(let i=0;i<9;i++)m=E.learnOne(m,'compound',{allowMixed:false}).machine;assert.ok(E.testErr(m,'compound')>.1)});
+test('two drives approach distinct targets smoothly',()=>{let d=new E.Drive(E.truth.compound);d.targets=[1.1,-1.3];for(let i=0;i<160;i++)d.step(.01);assert.ok(Math.abs(d.a[0]-1.1)<.05);assert.ok(Math.abs(d.a[1]+1.3)<.05)});
+test('compound gearing creates off diagonal inertia backreaction',()=>{let d=new E.Drive(E.truth.compound),[a,c,b]=d.inertiaMatrix();assert.ok(Math.abs(c)>1e-5);assert.ok(a*b>c*c)});
+test('replace machine preserves positions and velocities',()=>{let d=new E.Drive(E.truth.compound);d.targets=[1,2];d.step(.01);let a=[...d.a],v=[...d.v];d.machine=E.truth.additive;assert.deepEqual(d.a,a);assert.deepEqual(d.v,v)});
+test('JSON accepts valid models and rejects invalid ones',()=>{const d=E.decode({...E.fit('compound',[[2,-1]])});assert.equal(d.stages.length,1);assert.throws(()=>E.decode({format:'bad',origin:[0,0],stages:[]}));assert.throws(()=>E.decode({format:'hdr-gear-ai/2',origin:[0,0],stages:[{k:0,l:0,a:[1,2]}]}))});
+test('additive truth is recovered without cross couplings',()=>{let m=E.fit('additive',[]);for(let i=0;i<8;i++)m=E.learnOne(m,'additive',{allowMixed:false}).machine;assert.ok(E.testErr(m,'additive')<1e-12)});
+test('number from python shared fixture',()=>{const m=E.truth.compound,p=E.sample(m,.7,-1.4);close(p[0],-0.5370284277649965,1e-10);close(p[1],.4072085770945612,1e-10)});
