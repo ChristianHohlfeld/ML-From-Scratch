@@ -1,0 +1,24 @@
+name: HDR Physical Proof v0.7
+on:
+  push:
+    paths: ['research/hdr-motor-ai/v07/**', '.github/workflows/hdr-gear-ai-v07.yml']
+  pull_request:
+    paths: ['research/hdr-motor-ai/v07/**', '.github/workflows/hdr-gear-ai-v07.yml']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: research/hdr-motor-ai/v07
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq openscad
+      - run: python -m pip install -e '.[vision]' trimesh
+      - run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - run: python scripts/create_board.py
+      - run: python scripts/digital_twin.py
+      - run: python scripts/build_cad.py
+      - run: python -c "from pathlib import Path; assert Path('dist/physical_lab.html').stat().st_size>7000"

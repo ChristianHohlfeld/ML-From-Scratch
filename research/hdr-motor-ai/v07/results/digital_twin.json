@@ -1,0 +1,99 @@
+{
+  "source": "SYNTHETIC DIGITAL TWIN; NO HARDWARE MEASUREMENTS",
+  "model": "2R horizontal planar linkage",
+  "backreaction_mass_matrix_first_pose": [
+    [
+      0.00013867499999999997,
+      3.0375e-05
+    ],
+    [
+      3.0375e-05,
+      1.4475000000000001e-05
+    ]
+  ],
+  "mixed_difference_mm": [
+    -27.296396158755122,
+    0.0
+  ],
+  "trace": [
+    {
+      "a_deg": 0,
+      "b_deg": 0,
+      "tip_xy_mm": [
+        105.0,
+        0.0
+      ],
+      "target_ideal_mm": [
+        105.0,
+        0.0
+      ],
+      "settling_error_mm": 0.0
+    },
+    {
+      "a_deg": 20,
+      "b_deg": 0,
+      "tip_xy_mm": [
+        99.2165,
+        34.3668
+      ],
+      "target_ideal_mm": [
+        98.6677,
+        35.9121
+      ],
+      "settling_error_mm": 1.6399
+    },
+    {
+      "a_deg": 0,
+      "b_deg": 20,
+      "tip_xy_mm": [
+        102.3191,
+        16.2192
+      ],
+      "target_ideal_mm": [
+        102.2862,
+        15.3909
+      ],
+      "settling_error_mm": 0.829
+    },
+    {
+      "a_deg": 20,
+      "b_deg": 20,
+      "tip_xy_mm": [
+        91.6072,
+        48.0458
+      ],
+      "target_ideal_mm": [
+        90.8536,
+        49.4467
+      ],
+      "settling_error_mm": 1.5907
+    },
+    {
+      "a_deg": -20,
+      "b_deg": -20,
+      "tip_xy_mm": [
+        93.254,
+        -45.4331
+      ],
+      "target_ideal_mm": [
+        90.8536,
+        -49.4467
+      ],
+      "settling_error_mm": 4.6766
+    },
+    {
+      "a_deg": 0,
+      "b_deg": 0,
+      "tip_xy_mm": [
+        104.9741,
+        -2.1872
+      ],
+      "target_ideal_mm": [
+        105.0,
+        0.0
+      ],
+      "settling_error_mm": 2.1874
+    }
+  ],
+  "limitations": "Finite-torque simplified simulation without backlash, gravity, contacts, servo electronics or bearing friction"
+}
