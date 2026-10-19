@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict');const {test}=require('node:test');const W=require('../web/engine.js');
+test('closed angular 3-D surface with two axial boundaries',()=>{const g=W.generate({},24,13,13);assert.equal(g.rest.length,24*16*3);assert.equal(g.triangles.length,(24-1)*16*6);assert.ok(g.patch.every(p=>p>0));});
+test('bidirectional 3D solver finite and causal',()=>{const a=W.simulate({}, {steps:500,frames:3});assert.ok(a.energy.every(Number.isFinite));assert.equal(a.frames[0].wall.length,a.geometry.nx*16*3);assert.ok(a.maxWall>0);});
+test('finite difference of acoustic response elastic vs rigid',()=>{const a=W.simulate({}, {steps:650,frames:1});const b=W.simulate({}, {steps:650,frames:1,wall:{enabled:false}});const diff=a.signal.reduce((s,x,i)=>s+(x-b.signal[i])**2,0);assert.ok(diff>1e-10);assert.equal(b.maxWall,0);});
+test('invalid nonpassive wall rejected',()=>assert.throws(()=>W.simulate({}, {wall:{mass:-2},steps:10})));
+test('signature normalizes and learning finite',()=>{const r=W.simulate({}, {steps:450,frames:1});const x=W.signature(r);assert.ok(x.every(Number.isFinite));assert.ok(Math.abs(x.reduce((s,v)=>s+v*v,0)-1)<1e-9);});
+test('different shapes have different signals',()=>{const a=W.simulate({controls:[.6,1.3,.7,1.2]},{steps:550,frames:1});const b=W.simulate({controls:[1.3,.7,1.2,.6]},{steps:550,frames:1});const d=Math.hypot(...a.signal.map((x,i)=>x-b.signal[i]));assert.ok(d>0.001);});

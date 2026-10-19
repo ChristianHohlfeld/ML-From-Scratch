@@ -1,0 +1,30 @@
+name: HDR WaveForm v0.4 · 3D membrane and acoustic tests
+on:
+  push:
+    paths:
+      - 'research/hdr-motor-ai/voice-topology-v04/**'
+      - '.github/workflows/hdr-waveform-v04.yml'
+  pull_request:
+    paths:
+      - 'research/hdr-motor-ai/voice-topology-v04/**'
+      - '.github/workflows/hdr-waveform-v04.yml'
+jobs:
+  mechanics-and-browser-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: research/hdr-motor-ai/voice-topology-v04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -e '.[test]'
+      - run: python -m pytest -q
+      - run: node --test tests/test_engine.cjs
+      - run: python scripts/build.py
+      - name: Verify committed build identical
+        run: git diff --exit-code -- dist/index.html
